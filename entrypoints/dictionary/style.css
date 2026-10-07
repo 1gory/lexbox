@@ -1,0 +1,191 @@
+body {
+  margin: 0;
+  background: #f6f8fa;
+  font: 15px/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color: #1f2328;
+}
+
+.page {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.top h1 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.tab {
+  margin-left: 4px;
+  padding: 6px 14px;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  background: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+
+.tab.active {
+  border-color: #1f6feb;
+  background: #1f6feb;
+  color: #fff;
+}
+
+.toolbar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.toolbar button,
+.add-site {
+  padding: 6px 12px;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  background: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+
+.search,
+.site-input {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  font: inherit;
+}
+
+.hidden {
+  display: none;
+}
+
+.message.ok {
+  color: #1a7f37;
+}
+
+.message.error {
+  color: #cf222e;
+}
+
+.muted {
+  color: #57606a;
+}
+
+.entries,
+.sites {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.entry {
+  margin-bottom: 8px;
+  padding: 10px 14px;
+  border: 1px solid #d0d7de;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.entry-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.entry-text {
+  min-width: 160px;
+  font-weight: 600;
+}
+
+.entry-translation {
+  flex: 1;
+  padding: 4px 8px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  font: inherit;
+}
+
+.entry-translation:hover,
+.entry-translation:focus {
+  border-color: #d0d7de;
+  background: #fff;
+}
+
+.entry-translation.empty::placeholder {
+  color: #bf8700;
+}
+
+.link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #0969da;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.link.danger {
+  color: #cf222e;
+}
+
+.contexts {
+  margin: 10px 0 0;
+  padding: 0 0 0 12px;
+  border-left: 3px solid #eaeef2;
+  list-style: none;
+}
+
+.contexts li {
+  margin-bottom: 8px;
+}
+
+.sentence {
+  display: block;
+  color: #424a53;
+}
+
+.sentence mark {
+  padding: 0 2px;
+  border-radius: 3px;
+  background: rgba(255, 200, 40, 0.35);
+}
+
+.contexts a {
+  font-size: 12px;
+  color: #57606a;
+}
+
+.settings h2 {
+  margin: 24px 0 8px;
+  font-size: 16px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sites li {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid #eaeef2;
+}
+
+.add-site-form {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
