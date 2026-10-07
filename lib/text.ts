@@ -5,13 +5,13 @@ export interface Token {
   end: number;
 }
 
-const WORD_RE = /[A-Za-z]+(?:[''][A-Za-z]+)*/g;
+const WORD_RE = /[A-Za-z]+(?:['\u2019][A-Za-z]+)*/g;
 
 export function tokenize(text: string): Token[] {
   const tokens: Token[] = [];
   for (const m of text.matchAll(WORD_RE)) {
     const start = m.index!;
-    tokens.push({ value: m[0].toLowerCase().replace(/'/g, "'"), start, end: start + m[0].length });
+    tokens.push({ value: m[0].toLowerCase().replace(/\u2019/g, "'"), start, end: start + m[0].length });
   }
   return tokens;
 }
