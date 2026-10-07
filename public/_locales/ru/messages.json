@@ -1,0 +1,57 @@
+{
+  "extName": { "message": "Lexbox" },
+  "extDescription": { "message": "Собирайте английские слова при чтении и смотрите перевод прямо в тексте." },
+  "cmdSave": { "message": "Сохранить выделенное в Lexbox" },
+  "menuSave": { "message": "Добавить в Lexbox" },
+  "buttonSaveTitle": { "message": "Сохранить в Lexbox" },
+  "cardTranslationPlaceholder": { "message": "Перевод" },
+  "cardTranslating": { "message": "Перевожу…" },
+  "cardDownloading": { "message": "Загрузка переводчика…" },
+  "cardEnterManually": { "message": "Введите перевод" },
+  "cardSave": { "message": "Сохранить" },
+  "cardAddContext": { "message": "Добавить контекст" },
+  "cardCancel": { "message": "Отмена" },
+  "cardInDictionary": {
+    "message": "В словаре · контекстов: $COUNT$",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "popupHighlight": { "message": "Подсвечивать слова" },
+  "popupDisableSite": { "message": "Отключить на этом сайте" },
+  "popupUnavailable": { "message": "На этой странице недоступно" },
+  "popupWordCount": {
+    "message": "Слов в словаре: $COUNT$",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "popupEmpty": { "message": "Слов пока нет. Выделите слово на любой странице, чтобы сохранить его." },
+  "popupOpenDictionary": { "message": "Открыть словарь" },
+  "dictTitle": { "message": "Мой словарь" },
+  "dictTabWords": { "message": "Слова" },
+  "dictTabSettings": { "message": "Настройки" },
+  "dictSearch": { "message": "Поиск" },
+  "dictNothingFound": { "message": "Ничего не найдено" },
+  "dictNoTranslation": { "message": "Без перевода" },
+  "dictContexts": {
+    "message": "Контексты: $COUNT$",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "dictDelete": { "message": "Удалить" },
+  "dictConfirmDelete": {
+    "message": "Удалить «$TEXT$»?",
+    "placeholders": { "text": { "content": "$1" } }
+  },
+  "dictExportJson": { "message": "Экспорт JSON" },
+  "dictImportJson": { "message": "Импорт JSON" },
+  "dictExportCsv": { "message": "Экспорт CSV" },
+  "dictImported": {
+    "message": "Импортировано записей: $COUNT$",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "dictImportFailed": { "message": "Не удалось импортировать: это не бэкап Lexbox" },
+  "settingsFloatingButton": { "message": "Показывать кнопку сохранения рядом с выделением" },
+  "settingsShortcut": { "message": "Горячая клавиша: Alt+S (изменить: chrome://extensions/shortcuts)" },
+  "settingsExcludedSites": { "message": "Сайты, где подсветка отключена" },
+  "settingsNoExcludedSites": { "message": "Сайтов нет" },
+  "settingsSitePlaceholder": { "message": "example.com" },
+  "settingsAddSite": { "message": "Добавить" },
+  "settingsRemoveSite": { "message": "Убрать" }
+}

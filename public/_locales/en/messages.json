@@ -1,0 +1,57 @@
+{
+  "extName": { "message": "Lexbox" },
+  "extDescription": { "message": "Collect English words while reading and see their translations right in the text." },
+  "cmdSave": { "message": "Save selection to Lexbox" },
+  "menuSave": { "message": "Add to Lexbox" },
+  "buttonSaveTitle": { "message": "Save to Lexbox" },
+  "cardTranslationPlaceholder": { "message": "Translation" },
+  "cardTranslating": { "message": "Translating…" },
+  "cardDownloading": { "message": "Loading translator…" },
+  "cardEnterManually": { "message": "Enter the translation" },
+  "cardSave": { "message": "Save" },
+  "cardAddContext": { "message": "Add context" },
+  "cardCancel": { "message": "Cancel" },
+  "cardInDictionary": {
+    "message": "In dictionary · contexts: $COUNT$",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "popupHighlight": { "message": "Highlight saved words" },
+  "popupDisableSite": { "message": "Disable on this site" },
+  "popupUnavailable": { "message": "Not available on this page" },
+  "popupWordCount": {
+    "message": "Words in dictionary: $COUNT$",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "popupEmpty": { "message": "No words yet. Select a word on any page to save it." },
+  "popupOpenDictionary": { "message": "Open dictionary" },
+  "dictTitle": { "message": "My dictionary" },
+  "dictTabWords": { "message": "Words" },
+  "dictTabSettings": { "message": "Settings" },
+  "dictSearch": { "message": "Search" },
+  "dictNothingFound": { "message": "Nothing found" },
+  "dictNoTranslation": { "message": "No translation" },
+  "dictContexts": {
+    "message": "Contexts: $COUNT$",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "dictDelete": { "message": "Delete" },
+  "dictConfirmDelete": {
+    "message": "Delete \"$TEXT$\"?",
+    "placeholders": { "text": { "content": "$1" } }
+  },
+  "dictExportJson": { "message": "Export JSON" },
+  "dictImportJson": { "message": "Import JSON" },
+  "dictExportCsv": { "message": "Export CSV" },
+  "dictImported": {
+    "message": "Imported entries: $COUNT$",
+    "placeholders": { "count": { "content": "$1" } }
+  },
+  "dictImportFailed": { "message": "Import failed: the file is not a Lexbox backup" },
+  "settingsFloatingButton": { "message": "Show the save button next to a selection" },
+  "settingsShortcut": { "message": "Shortcut: Alt+S (change it at chrome://extensions/shortcuts)" },
+  "settingsExcludedSites": { "message": "Sites where highlighting is disabled" },
+  "settingsNoExcludedSites": { "message": "No sites" },
+  "settingsSitePlaceholder": { "message": "example.com" },
+  "settingsAddSite": { "message": "Add" },
+  "settingsRemoveSite": { "message": "Remove" }
+}
