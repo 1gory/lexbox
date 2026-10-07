@@ -4,9 +4,18 @@ import { buildIndex } from '@/lib/matcher';
 
 class FakeSink implements HighlightSink {
   ranges = new Set<Range>();
-  add(range: Range) { this.ranges.add(range); }
-  delete(range: Range) { return this.ranges.delete(range); }
-  clear() { this.ranges.clear(); }
+  deletes = 0;
+  clears = 0;
+  failNextAdd = false;
+  add(range: Range) {
+    if (this.failNextAdd) {
+      this.failNextAdd = false;
+      throw new Error('boom');
+    }
+    this.ranges.add(range);
+  }
+  delete(range: Range) { this.deletes++; return this.ranges.delete(range); }
+  clear() { this.clears++; this.ranges.clear(); }
   texts() { return [...this.ranges].map((r) => r.toString()).sort(); }
 }
 
@@ -72,5 +81,49 @@ describe('Highlighter', () => {
     document.querySelector('ul')!.remove();
     await tick();
     expect(sink.texts()).toEqual(['putting up with', 'running']);
+  });
+
+  it('ignores script and image nodes appended to body', async () => {
+    new Highlighter(document.body, sink, sync, 0).start(index);
+    const before = sink.texts();
+    document.body.insertAdjacentHTML('beforeend', '<script>x</script><img>');
+    await tick();
+    expect(sink.deletes).toBe(0);
+    expect(sink.texts()).toEqual(before);
+  });
+
+  it('only refreshes the paragraph whose text changed', async () => {
+    new Highlighter(document.body, sink, sync, 0).start(index);
+    (document.getElementById('a')!.firstChild as Text).data = 'He was walking. She was ';
+    await tick();
+    expect(sink.deletes).toBe(2); // the paragraph had two hits
+    expect(sink.texts()).toEqual(['putting up with', 'ran', 'run']);
+  });
+
+  it('flushes under continuous mutations (max-wait, not endless debounce)', async () => {
+    new Highlighter(document.body, sink, sync, 30).start(index);
+    const text = document.querySelector('li li')!.firstChild as Text;
+    let n = 0;
+    const timer = setInterval(() => { text.data = `Nested run ${n++}`; }, 5);
+    document.body.insertAdjacentHTML('beforeend', '<p>They ran home.</p>');
+    await tick(150);
+    clearInterval(timer);
+    expect(sink.texts()).toContain('ran');
+    expect(sink.texts().filter((t) => t === 'ran')).toHaveLength(2);
+  });
+
+  it('keeps highlighting later blocks when the sink throws once', () => {
+    sink.failNextAdd = true;
+    new Highlighter(document.body, sink, sync, 0).start(index);
+    expect(sink.texts()).toEqual(expect.arrayContaining(['ran', 'run']));
+  });
+
+  it('does not clear the sink when restarting with a new index', () => {
+    const h = new Highlighter(document.body, sink, sync, 0);
+    h.start(index);
+    const clears = sink.clears;
+    h.start(buildIndex([{ id: 'item', key: 'item' }]));
+    expect(sink.clears).toBe(clears);
+    expect(sink.texts()).toEqual(['Item']);
   });
 });

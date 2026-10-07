@@ -1,5 +1,7 @@
 import { findMatches, type MatchIndex } from '@/lib/matcher';
-import { BLOCK_SELECTOR, closestBlock, collectBlocks, isSkipped, rangeFromOffsets, type BlockText } from './dom';
+import {
+  BLOCK_SELECTOR, SKIP_SELECTOR, blockTextOf, closestBlock, collectBlocks, isSkipped, rangeFromOffsets, type BlockText,
+} from './dom';
 
 /** What we need from a CSS Highlight; the native `Highlight` satisfies it. */
 export interface HighlightSink {
@@ -21,13 +23,25 @@ export const idleScheduler: Scheduler = (task) =>
 const isBlockElement = (node: Node): boolean =>
   node.nodeType === Node.ELEMENT_NODE && (node as Element).matches(BLOCK_SELECTOR);
 
+/** Nodes that carry no text for us (skipped elements, images, empty elements). */
+const isInert = (node: Node): boolean => {
+  if (node.nodeType === Node.TEXT_NODE) return false;
+  if (node.nodeType !== Node.ELEMENT_NODE) return true;
+  const el = node as Element;
+  return el.matches(SKIP_SELECTOR) || !el.textContent;
+};
+
 export class Highlighter {
   private hits = new Map<Element, Hit[]>();
   private queue: BlockText[] = [];
   private pumping = false;
   private index: MatchIndex | null = null;
   private observer: MutationObserver | null = null;
-  private dirty = new Set<Node>();
+  /** Blocks whose own text changed. */
+  private textDirty = new Set<Node>();
+  /** Added block subtrees that must be collected in full. */
+  private newSubtrees = new Set<Element>();
+  private needsSweep = false;
   private flushTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
@@ -44,7 +58,8 @@ export class Highlighter {
   /** (Re)highlights the whole root with the given index and watches for changes. */
   start(index: MatchIndex): void {
     this.index = index;
-    this.clearAll();
+    // Apply replaces a block's hits, so there is no need to wipe highlights (avoids flicker).
+    this.queue = [];
     if (!this.observer) {
       this.observer = new MutationObserver((records) => this.onMutations(records));
       this.observer.observe(this.root, { childList: true, characterData: true, subtree: true });
@@ -57,7 +72,7 @@ export class Highlighter {
     this.observer = null;
     if (this.flushTimer) clearTimeout(this.flushTimer);
     this.flushTimer = null;
-    this.dirty.clear();
+    this.resetDirty();
     this.index = null;
     this.clearAll();
   }
@@ -89,12 +104,26 @@ export class Highlighter {
   }
 
   private pump(hasTime: () => boolean): void {
-    if (this.queue.length > 0) {
-      do this.apply(this.queue.shift()!);
-      while (this.queue.length > 0 && hasTime());
+    try {
+      while (this.queue.length > 0) {
+        try {
+          this.apply(this.queue.shift()!);
+        } catch {
+          // Skip a block that failed; keep the highlighter alive.
+        }
+        if (!hasTime()) break;
+      }
+    } finally {
+      if (this.queue.length > 0 && this.index) {
+        try {
+          this.schedule((next) => this.pump(next));
+        } catch {
+          this.pumping = false;
+        }
+      } else {
+        this.pumping = false;
+      }
     }
-    if (this.queue.length > 0 && this.index) this.schedule((next) => this.pump(next));
-    else this.pumping = false;
   }
 
   private apply(bt: BlockText): void {
@@ -116,46 +145,80 @@ export class Highlighter {
     this.hits.delete(block);
   }
 
+  private resetDirty(): void {
+    this.textDirty.clear();
+    this.newSubtrees.clear();
+    this.needsSweep = false;
+  }
+
+  private markAdded(parent: Node, node: Node): void {
+    if (isInert(node)) return;
+    if (node.nodeType === Node.TEXT_NODE) {
+      this.textDirty.add(parent);
+      return;
+    }
+    const el = node as Element;
+    if (isBlockElement(el)) {
+      this.newSubtrees.add(el);
+      return;
+    }
+    this.textDirty.add(parent);
+    for (const child of el.querySelectorAll(BLOCK_SELECTOR)) this.newSubtrees.add(child);
+  }
+
   private onMutations(records: MutationRecord[]): void {
-    let removed = false;
+    let changed = false;
     for (const record of records) {
       if (isSkipped(record.target)) continue;
-      if (record.removedNodes.length > 0) removed = true;
       if (record.type === 'characterData') {
-        this.dirty.add(record.target);
+        this.textDirty.add(record.target);
+        changed = true;
         continue;
       }
-      for (const node of record.addedNodes) this.dirty.add(isBlockElement(node) ? node : record.target);
-      // Removed blocks are cleaned up by the isConnected check; removed inline content changes the parent's text.
-      if ([...record.removedNodes].some((node) => !isBlockElement(node))) this.dirty.add(record.target);
+      for (const node of record.addedNodes) {
+        if (isInert(node)) continue;
+        this.markAdded(record.target, node);
+        changed = true;
+      }
+      for (const node of record.removedNodes) {
+        if (isInert(node)) continue;
+        if (isBlockElement(node)) this.needsSweep = true;
+        else this.textDirty.add(record.target);
+        changed = true;
+      }
     }
-    if (this.dirty.size === 0 && !removed) return;
-    if (this.flushTimer) clearTimeout(this.flushTimer);
+    if (!changed || this.flushTimer) return;
+    // Throttle: the pending flush picks up everything accumulated meanwhile.
     this.flushTimer = setTimeout(() => this.flush(), this.debounceMs);
   }
 
   private flush(): void {
     this.flushTimer = null;
-    if (!this.index) {
-      this.dirty.clear();
-      return;
-    }
-    const roots = new Set<Element>();
-    for (const node of this.dirty) {
-      if (!node.isConnected) continue;
-      const block = closestBlock(node);
-      if (block) roots.add(block);
-    }
-    this.dirty.clear();
+    const textDirty = [...this.textDirty];
+    const subtrees = [...this.newSubtrees];
+    this.resetDirty();
+    if (!this.index) return;
 
     for (const block of [...this.hits.keys()]) if (!block.isConnected) this.removeHits(block);
 
-    const all = [...roots];
-    const topmost = all.filter((b) => !all.some((other) => other !== b && other.contains(b)));
+    const live = subtrees.filter((el) => el.isConnected);
+    const topmost = live.filter((el) => !live.some((other) => other !== el && other.contains(el)));
     const blocks: BlockText[] = [];
     for (const root of topmost) {
       for (const block of [...this.hits.keys()]) if (root.contains(block)) this.removeHits(block);
       blocks.push(...collectBlocks(root).values());
+    }
+
+    const own = new Set<Element>();
+    for (const node of textDirty) {
+      if (!node.isConnected) continue;
+      const block = closestBlock(node);
+      if (block && !topmost.some((root) => root.contains(block))) own.add(block);
+    }
+    for (const block of own) {
+      const bt = blockTextOf(block);
+      if (bt) blocks.push(bt);
+      else this.removeHits(block);
     }
     this.enqueue(blocks);
   }
