@@ -16,7 +16,8 @@ Chrome-расширение для изучения английских сло�
 
 **Входит:**
 - сохранение выделенного слова или фразы с переводом и контекстом;
-- автоматический перевод через встроенный Chrome Translator API с правкой вручную;
+- автоматический перевод **с английского на русский** через встроенный Chrome Translator API
+  с правкой вручную (выбор языка перевода появится в следующих версиях);
 - подсветка сохранённых выражений на любых страницах с учётом словоформ;
 - тултип с переводом при наведении;
 - popup и отдельная страница словаря (поиск, правка, удаление, импорт/экспорт, настройки);
@@ -55,7 +56,7 @@ lexbox/
 | `morphology` | `forms(word): Set<string>` — все формы слова в нижнем регистре | таблица неправильных глаголов |
 | `matcher` | `buildIndex(entries)`, `findMatches(index, text): Match[]` (`{start, end, entryId}`) | `morphology` |
 | `context` | `extractSentence(blockText, start, end): string` | — |
-| `translator` | `translate(text, target): Promise<TranslateResult>`, `status()` | `Translator` global |
+| `translator` | `translate(text): Promise<TranslateResult>`, `status()` | `Translator` global |
 | `store` | `list()`, `get(id)`, `findByText(text)`, `save(draft)`, `update()`, `remove()`, `import()`, `export()`, `subscribe(cb)` | `chrome.storage.local`, `matcher` |
 
 ### Разрешения манифеста
@@ -89,7 +90,6 @@ interface Context {
 interface Settings {
   highlightEnabled: boolean;   // по умолчанию true
   floatingButton: boolean;     // по умолчанию true
-  targetLang: string | null;   // по умолчанию язык интерфейса браузера; null, если он английский
   excludedSites: string[];     // hostnames
 }
 ```
@@ -181,17 +181,16 @@ interface Settings {
   и ссылка на статью.
 - Экспорт и импорт **JSON** (полный бэкап; при импорте записи сливаются по `key`, контексты
   объединяются с дедупликацией). Экспорт **CSV** (`text, translation, sentence`) для Anki.
-- Раздел «Настройки»: плавающая кнопка, язык перевода, список исключённых сайтов.
+- Раздел «Настройки»: плавающая кнопка, список исключённых сайтов.
 
 ## Перевод
 
-- `translator.ts` проверяет `'Translator' in self` и `Translator.availability({sourceLanguage: 'en', targetLanguage})`.
-- Экземпляр переводчика кэшируется на языковую пару.
+- Языковая пара в v1 фиксирована: `en → ru` (константы в `translator.ts`).
+- `translator.ts` проверяет `'Translator' in self` и `Translator.availability({sourceLanguage: 'en', targetLanguage: 'ru'})`.
+- Экземпляр переводчика создаётся один раз и кэшируется.
 - `Translator.create()` вызывается после действия пользователя (открытия карточки), потому что
   загрузка языкового пакета требует user activation. Пока пакет загружается, показывается статус
   «загрузка переводчика…», поле перевода остаётся редактируемым.
-- Если `targetLang === null`, автоперевод не выполняется. Карточка показывает ссылку
-  «выберите язык перевода» на настройки.
 
 ## Ошибки и ограничения
 
