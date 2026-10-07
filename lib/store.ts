@@ -34,6 +34,13 @@ export function addContext(contexts: Context[], context: Context | null): Contex
 }
 
 /** Creates an entry, or adds the context to the entry the text is a form of. */
+/** `crypto.randomUUID` is undefined on insecure (http) pages, where the content script also runs. */
+function newId(): string {
+  if (typeof crypto.randomUUID === 'function') return crypto.randomUUID();
+  const bytes = crypto.getRandomValues(new Uint8Array(16));
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+}
+
 export async function saveEntry(draft: EntryDraft): Promise<Entry> {
   const key = normalizeKey(draft.text);
   if (!key) throw new Error('Nothing to save: the text has no words');
@@ -53,7 +60,7 @@ export async function saveEntry(draft: EntryDraft): Promise<Entry> {
   }
 
   const entry: Entry = {
-    id: crypto.randomUUID(),
+    id: newId(),
     text: draft.text.replace(/\s+/g, ' ').trim(),
     key,
     translation,

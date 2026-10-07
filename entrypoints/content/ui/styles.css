@@ -1,0 +1,112 @@
+.lx-fab,
+.lx-card,
+.lx-tooltip {
+  position: fixed;
+  z-index: 2147483647;
+  box-sizing: border-box;
+  font: 14px/1.4 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color: #1f2328;
+}
+
+.lx-fab {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid #d0d7de;
+  border-radius: 13px;
+  background: #fff;
+  color: #57606a;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+}
+
+.lx-fab:hover {
+  color: #0969da;
+  border-color: #0969da;
+}
+
+.lx-card {
+  width: 300px;
+  padding: 12px;
+  background: #fff;
+  border: 1px solid #d0d7de;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+}
+
+.lx-card input {
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0 0 8px;
+  padding: 6px 8px;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  background: #fff;
+  color: inherit;
+  font: inherit;
+}
+
+.lx-card .lx-text {
+  font-weight: 600;
+}
+
+.lx-hint {
+  margin: -4px 0 8px;
+  font-size: 12px;
+  color: #57606a;
+}
+
+.lx-sentence {
+  max-height: 4.2em;
+  overflow: hidden;
+  margin-bottom: 10px;
+  font-size: 12px;
+  color: #8c959f;
+}
+
+.lx-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.lx-actions button {
+  padding: 5px 12px;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  background: #f6f8fa;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.lx-actions .lx-save {
+  border-color: #1f6feb;
+  background: #1f6feb;
+  color: #fff;
+}
+
+.lx-actions .lx-save:disabled {
+  opacity: 0.6;
+}
+
+.lx-tooltip {
+  max-width: 280px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: #1f2328;
+  color: #fff;
+  font-size: 13px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+}
+
+.lx-tt-text {
+  font-size: 12px;
+  opacity: 0.7;
+}
