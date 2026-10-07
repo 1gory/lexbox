@@ -22,7 +22,7 @@ describe('saveEntry', () => {
   it('falls back to a hex id when crypto.randomUUID is unavailable', async () => {
     vi.stubGlobal('crypto', { getRandomValues: crypto.getRandomValues.bind(crypto), randomUUID: undefined });
     try {
-      const saved = await saveEntry({ text: 'walk', translation: 'идти' });
+      const saved = await saveEntry({ text: 'walk', translation: 'идти', context: ctx('I walk.') });
       expect(saved.id).toMatch(/^[0-9a-f]{32}$/);
       expect(await listEntries()).toEqual([saved]);
     } finally {
