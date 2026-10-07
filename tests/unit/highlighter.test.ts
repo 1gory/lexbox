@@ -43,6 +43,18 @@ describe('Highlighter', () => {
     expect(sink.texts()).toEqual(['putting up with', 'ran', 'run', 'running']);
   });
 
+  it('reports hasHits only while something is highlighted', () => {
+    const h = new Highlighter(document.body, sink, sync, 0);
+    expect(h.hasHits).toBe(false);
+    h.start(index);
+    expect(h.hasHits).toBe(true);
+    h.start(buildIndex([{ id: 'zzz', key: 'zzz' }]));
+    expect(h.hasHits).toBe(false);
+    h.start(index);
+    h.stop();
+    expect(h.hasHits).toBe(false);
+  });
+
   it('restarts with a new index and stops cleanly', () => {
     const h = new Highlighter(document.body, sink, sync, 0);
     h.start(index);

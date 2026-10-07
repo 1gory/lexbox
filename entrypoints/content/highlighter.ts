@@ -55,6 +55,11 @@ export class Highlighter {
     return this.index !== null;
   }
 
+  /** Cheap check: is anything currently highlighted? */
+  get hasHits(): boolean {
+    return this.hits.size > 0;
+  }
+
   /** (Re)highlights the whole root with the given index and watches for changes. */
   start(index: MatchIndex): void {
     this.index = index;

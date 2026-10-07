@@ -1,7 +1,8 @@
 import type { Highlighter, Hit } from './highlighter';
 
 export interface HoverOptions {
-  highlighter: Highlighter;
+  /** The current highlighter (it can be replaced when the page swaps its body). */
+  getHighlighter(): Highlighter | null;
   /** False while a card or the save button is shown. */
   canShow(): boolean;
   onEnter(hit: Hit, rect: DOMRect): void;
@@ -18,7 +19,7 @@ function caretAt(x: number, y: number): { node: Node; offset: number } | null {
 
 const contains = (r: DOMRect, x: number, y: number) => x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
 
-export function watchHover({ highlighter, canShow, onEnter, onLeave, delayMs = 150 }: HoverOptions): {
+export function watchHover({ getHighlighter, canShow, onEnter, onLeave, delayMs = 150 }: HoverOptions): {
   reset(): void;
   dispose(): void;
 } {
@@ -35,8 +36,10 @@ export function watchHover({ highlighter, canShow, onEnter, onLeave, delayMs = 1
 
   function update(x: number, y: number) {
     if (!canShow()) return;
-    const caret = highlighter.active ? caretAt(x, y) : null;
-    const hit = caret ? highlighter.hitAt(caret.node, caret.offset, x, y) : null;
+    const highlighter = getHighlighter();
+    // Skip the (relatively costly) caret lookup when nothing is highlighted.
+    const caret = highlighter?.active && highlighter.hasHits ? caretAt(x, y) : null;
+    const hit = caret && highlighter ? highlighter.hitAt(caret.node, caret.offset, x, y) : null;
     if (hit === current) return;
     current = hit;
     cancel();

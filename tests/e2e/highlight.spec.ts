@@ -52,16 +52,31 @@ test('shows the translation on hover', async ({ context, worker }) => {
   await expect(page.locator('lexbox-ui .lx-tooltip')).toHaveCount(0);
 });
 
+test('keeps highlighting after the page swaps its body', async ({ context, worker }) => {
+  await seedWords(worker);
+  const page = await context.newPage();
+  await page.goto(ARTICLE_URL);
+  await expect.poll(async () => (await highlighted(page)).length).toBe(6);
+  await page.evaluate(() => {
+    const body = document.createElement('body');
+    body.innerHTML = '<p>They ran home.</p>';
+    document.body.replaceWith(body);
+  });
+  await expect.poll(() => highlighted(page)).toEqual(['ran']);
+});
+
 test('respects the global switch and excluded sites', async ({ context, worker }) => {
   await seedWords(worker);
   await seed(worker, { settings: { highlightEnabled: false, floatingButton: true, excludedSites: [] } });
   const page = await context.newPage();
   await page.goto(ARTICLE_URL);
   await page.waitForSelector('lexbox-ui', { state: 'attached' });
+  // Give the content script time to load entries and settings, so the check below is not vacuous.
+  await page.waitForTimeout(500);
   expect(await highlighted(page)).toEqual([]);
 
   await seed(worker, { settings: { highlightEnabled: true, floatingButton: true, excludedSites: ['lexbox.test'] } });
-  await page.waitForTimeout(300);
+  await page.waitForTimeout(500);
   expect(await highlighted(page)).toEqual([]);
 
   await seed(worker, { settings: { highlightEnabled: true, floatingButton: true, excludedSites: [] } });

@@ -23,6 +23,7 @@ export default defineContentScript({
   async main(ctx) {
     const store = createUiStore();
     let settings: Settings = await getSettings();
+    if (ctx.isInvalid) return;
     let entries = new Map<string, Entry>();
     let index: MatchIndex = buildIndex([]);
 
@@ -32,9 +33,20 @@ export default defineContentScript({
     (document.head ?? document.documentElement).append(style);
     const highlight = new Highlight();
     CSS.highlights.set(HIGHLIGHT_NAME, highlight);
-    const highlighter = new Highlighter(document.body, highlight);
+    // document.body is null in XML/SVG documents: then there is nothing to highlight.
+    let highlighterRoot: Element | null = document.body;
+    let highlighter: Highlighter | null = highlighterRoot ? new Highlighter(highlighterRoot, highlight) : null;
+    let bodyObserver: MutationObserver | null = null;
+
+    ctx.onInvalidated(() => {
+      bodyObserver?.disconnect();
+      highlighter?.stop();
+      style.remove();
+      if (CSS.highlights.get(HIGHLIGHT_NAME) === highlight) CSS.highlights.delete(HIGHLIGHT_NAME);
+    });
 
     function refreshHighlighting(): void {
+      if (ctx.isInvalid || !highlighter) return;
       const enabled = settings.highlightEnabled && !settings.excludedSites.includes(location.hostname);
       if (enabled) highlighter.start(index);
       else highlighter.stop();
@@ -42,6 +54,7 @@ export default defineContentScript({
 
     async function load(): Promise<void> {
       const list = await listEntries();
+      if (ctx.isInvalid) return;
       entries = new Map(list.map((e) => [e.id, e]));
       index = buildIndex(list);
       refreshHighlighting();
@@ -56,7 +69,10 @@ export default defineContentScript({
 
     const actions: UiActions = {
       async openCard(selection: SelectionInfo) {
+        const before = store.get();
         await reloading.catch(() => {});
+        // The UI moved on while we waited (dismissed, other selection): do not resurrect a card.
+        if (ctx.isInvalid || store.get() !== before) return;
         const id = matchWhole(index, selection.text);
         store.set({
           kind: 'card',
@@ -84,12 +100,13 @@ export default defineContentScript({
         if (container) render(null, container);
       },
     });
+    if (ctx.isInvalid) return;
     ui.mount();
 
     const fromOurUi = (e: Event) => e.composedPath().includes(ui.shadowHost);
 
     const hover = watchHover({
-      highlighter,
+      getHighlighter: () => highlighter,
       canShow: () => {
         const kind = store.get().kind;
         return kind === 'idle' || kind === 'tooltip';
@@ -97,11 +114,23 @@ export default defineContentScript({
       onEnter(hit, rect) {
         const entry = entries.get(hit.entryId);
         if (entry) store.set({ kind: 'tooltip', at: { x: rect.left, y: rect.bottom + 6 }, entry });
+        else if (store.get().kind === 'tooltip') store.set({ kind: 'idle' });
       },
       onLeave() {
         if (store.get().kind === 'tooltip') store.set({ kind: 'idle' });
       },
     });
+
+    // Turbo Drive and similar swap document.body: rebind the highlighter to the new one.
+    bodyObserver = new MutationObserver(() => {
+      if (ctx.isInvalid || document.body === highlighterRoot) return;
+      highlighter?.stop();
+      highlighterRoot = document.body;
+      highlighter = highlighterRoot ? new Highlighter(highlighterRoot, highlight) : null;
+      hover.reset();
+      refreshHighlighting();
+    });
+    bodyObserver.observe(document.documentElement, { childList: true });
 
     ctx.addEventListener(document, 'mouseup', (e) => {
       if (fromOurUi(e) || !settings.floatingButton) return;
@@ -155,7 +184,6 @@ export default defineContentScript({
       offEntries();
       offSettings();
       browser.runtime.onMessage.removeListener(onMessage);
-      highlighter.stop();
     });
 
     await reloadEntries();
