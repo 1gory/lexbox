@@ -11,6 +11,7 @@
   "cardSave": { "message": "Сохранить" },
   "cardAddContext": { "message": "Добавить контекст" },
   "cardCancel": { "message": "Отмена" },
+  "cardSaveFailed": { "message": "Не удалось сохранить. Попробуйте ещё раз." },
   "cardInDictionary": {
     "message": "В словаре · контекстов: $COUNT$",
     "placeholders": { "count": { "content": "$1" } }

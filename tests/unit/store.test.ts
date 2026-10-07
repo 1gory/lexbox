@@ -19,6 +19,17 @@ const ctx = (sentence: string, url = 'https://a.test/1'): Context => ({ sentence
 beforeEach(() => fakeBrowser.reset());
 
 describe('saveEntry', () => {
+  it('falls back to a hex id when crypto.randomUUID is unavailable', async () => {
+    vi.stubGlobal('crypto', { getRandomValues: crypto.getRandomValues.bind(crypto), randomUUID: undefined });
+    try {
+      const saved = await saveEntry({ text: 'walk', translation: 'идти' });
+      expect(saved.id).toMatch(/^[0-9a-f]{32}$/);
+      expect(await listEntries()).toEqual([saved]);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
   it('creates a new entry', async () => {
     const saved = await saveEntry({ text: ' Put  up with ', translation: ' терпеть ', context: ctx('Cannot put up with it.') });
     expect(saved).toMatchObject({ text: 'Put up with', key: 'put up with', translation: 'терпеть' });

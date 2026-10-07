@@ -11,6 +11,7 @@
   "cardSave": { "message": "Save" },
   "cardAddContext": { "message": "Add context" },
   "cardCancel": { "message": "Cancel" },
+  "cardSaveFailed": { "message": "Could not save. Try again." },
   "cardInDictionary": {
     "message": "In dictionary · contexts: $COUNT$",
     "placeholders": { "count": { "content": "$1" } }

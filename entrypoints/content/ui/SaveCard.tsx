@@ -22,6 +22,7 @@ export function SaveCard({ at, selection, existing, onClose }: Props) {
   const [translation, setTranslation] = useState(existing?.translation ?? '');
   const [status, setStatus] = useState<Status>(existing ? 'idle' : 'translating');
   const [saving, setSaving] = useState(false);
+  const [failed, setFailed] = useState(false);
   const edited = useRef(false);
   const translationRef = useRef<HTMLInputElement>(null);
 
@@ -46,6 +47,7 @@ export function SaveCard({ at, selection, existing, onClose }: Props) {
   async function save() {
     if (saving || !normalizeKey(text)) return;
     setSaving(true);
+    setFailed(false);
     try {
       await saveEntry({
         text,
@@ -53,13 +55,16 @@ export function SaveCard({ at, selection, existing, onClose }: Props) {
         context: { sentence: selection.sentence, url: location.href, title: document.title, addedAt: Date.now() },
       });
       onClose();
-    } catch {
+    } catch (error) {
+      console.error('[lexbox] save failed', error);
+      setFailed(true);
       setSaving(false);
     }
   }
 
   function onKeyDown(e: KeyboardEvent) {
     if (e.key === 'Enter') {
+      if (!(e.target instanceof HTMLInputElement) || e.isComposing) return;
       e.preventDefault();
       void save();
     } else if (e.key === 'Escape') {
@@ -85,6 +90,7 @@ export function SaveCard({ at, selection, existing, onClose }: Props) {
         {status === 'downloading' && <div class="lx-hint">{t('cardDownloading')}</div>}
         {status === 'manual' && <div class="lx-hint">{t('cardEnterManually')}</div>}
         {existing && <div class="lx-hint lx-existing">{t('cardInDictionary', String(existing.contexts.length))}</div>}
+        {failed && <div class="lx-hint lx-error">{t('cardSaveFailed')}</div>}
         {selection.sentence && <div class="lx-sentence">{selection.sentence}</div>}
         <div class="lx-actions">
           <button type="button" class="lx-cancel" onClick={onClose}>

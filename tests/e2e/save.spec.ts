@@ -64,6 +64,18 @@ test('Escape closes the card without saving', async ({ context, worker }) => {
   expect(await storedEntries(worker)).toEqual([]);
 });
 
+test('Enter on the focused Cancel button closes the card without saving', async ({ context, worker }) => {
+  const page = await context.newPage();
+  await page.goto(ARTICLE_URL);
+  await selectText(page, '#p1', 'committee');
+  await page.locator('lexbox-ui .lx-fab').click();
+  await page.locator('lexbox-ui .lx-translation').fill('комитет');
+  await page.locator('lexbox-ui .lx-cancel').focus();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('lexbox-ui .lx-card')).toHaveCount(0);
+  expect(await storedEntries(worker)).toEqual([]);
+});
+
 test('the background message opens the card for the current selection', async ({ context, worker }) => {
   const page = await context.newPage();
   await page.goto(ARTICLE_URL);
