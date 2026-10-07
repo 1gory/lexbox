@@ -6,7 +6,12 @@ import { Tooltip } from './Tooltip';
 
 export function App({ store, actions }: { store: UiStore; actions: UiActions }) {
   const [state, setState] = useState(store.get());
-  useEffect(() => store.subscribe(() => setState(store.get())), [store]);
+  useEffect(() => {
+    const unsubscribe = store.subscribe(() => setState(store.get()));
+    // The effect runs after mount; a store.set() made before it subscribed would be missed.
+    setState(store.get());
+    return unsubscribe;
+  }, [store]);
 
   switch (state.kind) {
     case 'button':

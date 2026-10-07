@@ -1,5 +1,5 @@
 import type { ComponentChildren } from 'preact';
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import { t } from '@/lib/i18n';
 import { buildIndex, findMatches } from '@/lib/matcher';
 import { removeEntry, updateTranslation } from '@/lib/store';
@@ -21,10 +21,24 @@ export function EntryRow({ entry }: { entry: Entry }) {
   const [value, setValue] = useState(entry.translation);
   const [open, setOpen] = useState(false);
 
-  useEffect(() => setValue(entry.translation), [entry.translation]);
+  // Last value sent to the store; stops Enter + the following blur from saving twice.
+  const committed = useRef(entry.translation);
 
-  function commit() {
-    if (value.trim() !== entry.translation) void updateTranslation(entry.id, value);
+  // Mirror external changes only. The effect also runs after mount, and an unconditional
+  // setValue there would overwrite text typed before it fires.
+  const shown = useRef(entry.translation);
+  useEffect(() => {
+    if (shown.current === entry.translation) return;
+    shown.current = entry.translation;
+    committed.current = entry.translation;
+    setValue(entry.translation);
+  }, [entry.translation]);
+
+  function commit(raw: string) {
+    const next = raw.trim();
+    if (next === committed.current) return;
+    committed.current = next;
+    void updateTranslation(entry.id, raw);
   }
 
   function remove() {
@@ -40,9 +54,12 @@ export function EntryRow({ entry }: { entry: Entry }) {
           value={value}
           placeholder={t('dictNoTranslation')}
           onInput={(e) => setValue(e.currentTarget.value)}
-          onBlur={commit}
+          onBlur={(e) => commit(e.currentTarget.value)}
           onKeyDown={(e) => {
-            if (e.key === 'Enter') e.currentTarget.blur();
+            if (e.key !== 'Enter') return;
+            // Persist directly: blur is not dispatched when the page lacks focus.
+            commit(e.currentTarget.value);
+            e.currentTarget.blur();
           }}
         />
         <button type="button" class="link toggle-contexts" onClick={() => setOpen(!open)}>
