@@ -38,13 +38,13 @@ source maps.
       `unlimitedStorage` (the dictionary), `contextMenus` ("Add to Lexbox"),
       `activeTab` (the popup's reload hint), the content script on `<all_urls>`
       (highlighting on any page). Texts in `STORE_LISTING.md`.
-- [ ] **No data collection** — nothing is sent anywhere; the privacy policy
+- [x] **No data collection** — nothing is sent anywhere; the privacy policy
       says so and also discloses the CSS Custom Highlight API caveat.
-- [ ] **No remote code** — all JS and CSS are bundled; translation is Chrome's
+- [x] **No remote code** — all JS and CSS are bundled; translation is Chrome's
       built-in API, not a remote service (`remote code: No`).
 - [ ] **No trademarked / third-party IP in shipped assets** — the Lx icon is
       original. The listing mentions Anki only as a CSV export target.
-- [ ] **Screenshots reflect the real current extension** (made from the real
+- [x] **Screenshots reflect the real current extension** (made from the real
       build by `npm run store:assets`). No mockups passed off as the product.
 - [ ] **Metadata is not misleading** — the listing says translation is English →
       Russian only and needs Chrome 138+ for the automatic part.
@@ -61,29 +61,29 @@ source maps.
       `128.png` (source `store/icon/icon.svg`)
 - [x] `LICENSE` (MIT) in the repo root
 - [x] `homepage_url` and `author` set in `wxt.config.ts`
-- [ ] `npm run compile`, `npm test`, `npm run e2e` green on the final commit
+- [x] `npm run compile`, `npm test`, `npm run e2e` green on the final commit
 - [ ] Loaded `dist/chrome-mv3` unpacked and walked the full loop on a real
       article (see `RELEASE.md` step 2), with the UI in English and in Russian
 
 ## B. Assets
 
-- [ ] `npm run store:assets` produced 4 screenshots at 1280×800 per language:
+- [x] `npm run store:assets` produced 4 screenshots at 1280×800 per language:
       `store/screenshots/{en,ru}/screenshot_1280x800_{1..4}.jpg`
-- [ ] Small promo tile 440×280: `store/promo/{en,ru}/tile_440x280.png`
-- [ ] (Optional) Marquee 1400×560: `store/promo/{en,ru}/marquee_1400x560.png` —
+- [x] Small promo tile 440×280: `store/promo/{en,ru}/tile_440x280.png`
+- [x] (Optional) Marquee 1400×560: `store/promo/{en,ru}/marquee_1400x560.png` —
       only for featured placement; not required to publish
-- [ ] Promo PNGs have no alpha channel (`sips -g hasAlpha store/promo/*/*.png`)
-- [ ] Every image opened and checked: legible, right language inside the UI
+- [x] Promo PNGs have no alpha channel (`sips -g hasAlpha store/promo/*/*.png`)
+- [x] Every image opened and checked: legible, right language inside the UI
 
 ## C. GitHub repository
 
-- [ ] Create the repo `1gory/lexbox` (public). `homepage_url` in
+- [x] Create the repo `1gory/lexbox` (public). `homepage_url` in
       `wxt.config.ts` already points at `https://github.com/1gory/lexbox`;
       keep the name or update that URL and the README.
-- [ ] Add the remote and push: `git remote add origin
+- [x] Add the remote and push: `git remote add origin
       git@github.com:1gory/lexbox.git`, merge `feat/lexbox-v1` into `master`,
       `git push -u origin master`
-- [ ] Repo description + website `https://ipershin.me/lexbox/` + topics
+- [x] Repo description + website `https://ipershin.me/lexbox/` + topics
       (`chrome-extension`, `manifest-v3`, `english`, `vocabulary`,
       `language-learning`, `wxt`)
 
@@ -93,22 +93,22 @@ The site is `/Users/ig/Sites/player-ready-one/pershin.me`
 (`git@github.com:1gory/pershin.me.git`); a push to `main` deploys it. Use the
 `my-little-plant/` pages there as the model.
 
-- [ ] `pershin.me/lexbox/index.html` — landing page: tagline, features, the
+- [x] `pershin.me/lexbox/index.html` — landing page: tagline, features, the
       privacy note, "Chrome Web Store: coming soon" until the listing is live,
       GitHub link
-- [ ] `pershin.me/lexbox/privacy/index.html` — `PRIVACY_POLICY.md` as HTML,
+- [x] `pershin.me/lexbox/privacy/index.html` — `PRIVACY_POLICY.md` as HTML,
       canonical `https://ipershin.me/lexbox/privacy/`
-- [ ] `pershin.me/lexbox/icon.png` (from `public/icon/128.png`)
-- [ ] `pershin.me/img/projects/lexbox.jpg` (from `store/site/lexbox.jpg`)
-- [ ] Project card in `pershin.me/projects.json` (`description` and
+- [x] `pershin.me/lexbox/icon.png` (from `public/icon/128.png`)
+- [x] `pershin.me/img/projects/lexbox.jpg` (from `store/site/lexbox.jpg`)
+- [x] Project card in `pershin.me/projects.json` (`description` and
       `descriptionRu`; leave `url` empty or point it at the landing until the
       store URL exists)
-- [ ] `/lexbox/` and `/lexbox/privacy/` in `pershin.me/sitemap.xml`; a link in
+- [x] `/lexbox/` and `/lexbox/privacy/` in `pershin.me/sitemap.xml`; a link in
       the projects list of `pershin.me/index.html` if the others have one
-- [ ] Push `main`, wait for the deploy, then open
+- [x] Push `main`, wait for the deploy, then open
       `https://ipershin.me/lexbox/` and `https://ipershin.me/lexbox/privacy/` —
       both must load
-- [ ] The privacy URL is what you paste into the store form (step F)
+- [x] The privacy URL is what you paste into the store form (step F)
 
 ## E. Chrome Web Store developer account
 
