@@ -38,5 +38,8 @@ Without it the user types the translation manually.
 - All data (saved words, translations, example sentences with their page URLs and titles, settings)
   stays on the device in `chrome.storage.local`. Nothing is sent anywhere.
 - Translation runs on-device through Chrome's built-in Translator API.
+- Permissions: `storage` and `unlimitedStorage` for the dictionary, `contextMenus` for "Add to Lexbox",
+  and `activeTab`, so the popup can read the current tab's address when you open it and suggest a reload
+  on pages opened before Lexbox was installed. The content script runs on all pages to highlight words.
 - Highlighting uses the CSS Custom Highlight API. Its registry belongs to the page, so a page's own
   scripts can see which words on that page are highlighted, and so learn which of them are saved.

@@ -10,7 +10,9 @@ export default defineConfig({
     default_locale: 'en',
     // CSS Custom Highlight API (Highlight, CSS.highlights).
     minimum_chrome_version: '105',
-    permissions: ['storage', 'unlimitedStorage', 'contextMenus'],
+    // activeTab: opening the popup lets it read the active tab's url (no install warning), so it can
+    // tell a web page opened before install, which only needs a reload, from a restricted page.
+    permissions: ['storage', 'unlimitedStorage', 'contextMenus', 'activeTab'],
     commands: {
       'save-selection': {
         suggested_key: { default: 'Alt+S' },

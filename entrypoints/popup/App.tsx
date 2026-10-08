@@ -23,8 +23,9 @@ async function activePage(): Promise<PageState> {
   } catch {
     // No content script in the tab.
   }
-  // Chrome exposes tab.url only with the "tabs" permission or an explicit host permission; the
-  // content-script matches do not count. Without it the url is undefined and we say "unavailable".
+  // Chrome exposes tab.url only with "tabs" or a host permission; the content-script matches do not
+  // count. activeTab grants it for the active tab when the user opens the popup. If the url is still
+  // missing (popup opened as a tab, as in e2e) we say "unavailable".
   return isContentScriptUrl(tab.url) ? { kind: 'reload' } : { kind: 'unavailable' };
 }
 
