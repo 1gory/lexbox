@@ -13,9 +13,19 @@ function stubTranslator(availability: string, impl: (text: string) => Promise<st
   return { api, instance };
 }
 
+/** Stubs navigator.userActivation.isActive; `undefined` removes the API. */
+function stubActivation(isActive: boolean | undefined) {
+  Object.defineProperty(navigator, 'userActivation', {
+    configurable: true,
+    get: () => (isActive === undefined ? undefined : { isActive, hasBeenActive: isActive }),
+  });
+}
+
 afterEach(() => {
   delete (globalThis as Global).Translator;
+  delete (navigator as { userActivation?: unknown }).userActivation;
   resetTranslator();
+  vi.restoreAllMocks();
 });
 
 describe('translate', () => {
@@ -44,10 +54,37 @@ describe('translate', () => {
     expect(onDownloading).toHaveBeenCalledOnce();
   });
 
-  it('returns error and recreates the translator after a failure', async () => {
+  it.each(['downloadable', 'downloading'])(
+    'asks for a user gesture instead of creating the translator when %s without activation',
+    async (availability) => {
+      const { api } = stubTranslator(availability);
+      stubActivation(false);
+      const onDownloading = vi.fn();
+      expect(await translate('hello', onDownloading)).toEqual({ status: 'needs-download' });
+      expect(api.create).not.toHaveBeenCalled();
+      expect(onDownloading).not.toHaveBeenCalled();
+
+      // The retry from a click has activation.
+      stubActivation(true);
+      expect(await translate('hello', onDownloading)).toEqual({ status: 'ok', text: 'ru:hello' });
+      expect(onDownloading).toHaveBeenCalledOnce();
+      expect(api.create).toHaveBeenCalledOnce();
+    },
+  );
+
+  it('needs no activation once the language pack is available', async () => {
+    stubTranslator('available');
+    stubActivation(false);
+    expect(await translate('hello')).toEqual({ status: 'ok', text: 'ru:hello' });
+  });
+
+  it('returns error, logs it and recreates the translator after a failure', async () => {
     const { api, instance } = stubTranslator('available');
-    instance.translate.mockRejectedValueOnce(new Error('boom'));
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const boom = new Error('boom');
+    instance.translate.mockRejectedValueOnce(boom);
     expect(await translate('hello')).toEqual({ status: 'error' });
+    expect(warn).toHaveBeenCalledWith('[lexbox] translation failed', boom);
     expect(await translate('hello')).toEqual({ status: 'ok', text: 'ru:hello' });
     expect(api.create).toHaveBeenCalledTimes(2);
   });

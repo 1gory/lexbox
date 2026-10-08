@@ -1,7 +1,12 @@
 export const SOURCE_LANG = 'en';
 export const TARGET_LANG = 'ru';
 
-export type TranslateResult = { status: 'ok'; text: string } | { status: 'unavailable' } | { status: 'error' };
+export type TranslateResult =
+  | { status: 'ok'; text: string }
+  | { status: 'unavailable' }
+  /** The language pack must be downloaded, which needs a user gesture: call again from a click. */
+  | { status: 'needs-download' }
+  | { status: 'error' };
 
 interface LanguagePair {
   sourceLanguage: string;
@@ -26,9 +31,15 @@ function api(): TranslatorApi | undefined {
   return (globalThis as { Translator?: TranslatorApi }).Translator;
 }
 
+/** False only when the page is known to have no transient user activation. */
+function hasActivation(): boolean {
+  const activation = (globalThis.navigator as { userActivation?: { isActive: boolean } } | undefined)?.userActivation;
+  return activation?.isActive !== false;
+}
+
 /**
- * On-device translation. Call it from a user gesture: downloading the language
- * pack the first time requires user activation.
+ * On-device translation. Downloading the language pack the first time requires user
+ * activation; without it (shortcut, context menu) the result is 'needs-download'.
  */
 export async function translate(text: string, onDownloading?: () => void): Promise<TranslateResult> {
   const translatorApi = api();
@@ -37,12 +48,16 @@ export async function translate(text: string, onDownloading?: () => void): Promi
     if (!instance) {
       const availability = await translatorApi.availability(PAIR);
       if (availability === 'unavailable') return { status: 'unavailable' };
-      if (availability !== 'available') onDownloading?.();
+      if (availability !== 'available') {
+        if (!hasActivation()) return { status: 'needs-download' };
+        onDownloading?.();
+      }
       instance = translatorApi.create(PAIR);
     }
     const translator = await instance;
     return { status: 'ok', text: await translator.translate(text) };
-  } catch {
+  } catch (error) {
+    console.warn('[lexbox] translation failed', error);
     instance = null;
     return { status: 'error' };
   }

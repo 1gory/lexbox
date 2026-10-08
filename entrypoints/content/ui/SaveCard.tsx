@@ -8,7 +8,7 @@ import type { SelectionInfo } from '../dom';
 import type { Point } from '../ui-store';
 import { Floating } from './Floating';
 
-type Status = 'idle' | 'translating' | 'downloading' | 'manual';
+type Status = 'idle' | 'translating' | 'downloading' | 'needs-download' | 'manual';
 
 /** Runs `action` for real user input only, not for clicks a page script dispatches. */
 const trusted = (action: () => void) => (e: Event) => {
@@ -45,7 +45,7 @@ export function SaveCard({ at, selection, existing, onClose }: Props) {
         if (!edited.current) setTranslation(result.text);
         setStatus('idle');
       } else {
-        setStatus('manual');
+        setStatus(result.status === 'needs-download' ? 'needs-download' : 'manual');
       }
     });
   }
@@ -117,6 +117,13 @@ export function SaveCard({ at, selection, existing, onClose }: Props) {
         />
         {status === 'downloading' && <div class="lx-hint">{t('cardDownloading')}</div>}
         {status === 'manual' && <div class="lx-hint">{t('cardEnterManually')}</div>}
+        {status === 'needs-download' && (
+          // Opened by the shortcut or the context menu there is no user activation to start the
+          // language-pack download with; this click provides it. Typing a translation still works.
+          <button type="button" class="lx-download" onClick={trusted(runTranslation)}>
+            {t('cardDownloadTranslator')}
+          </button>
+        )}
         {entry && <div class="lx-hint lx-existing">{t('cardInDictionary', String(entry.contexts.length))}</div>}
         {otherForm && (
           <button type="button" class="lx-separate" onClick={trusted(saveSeparately)}>

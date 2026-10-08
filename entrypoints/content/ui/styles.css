@@ -115,7 +115,8 @@
   color: #cf222e;
 }
 
-.lx-card .lx-separate {
+.lx-card .lx-separate,
+.lx-card .lx-download {
   display: block;
   margin: -4px 0 10px;
   padding: 0;
@@ -127,6 +128,7 @@
   cursor: pointer;
 }
 
-.lx-card .lx-separate:hover {
+.lx-card .lx-separate:hover,
+.lx-card .lx-download:hover {
   text-decoration: underline;
 }

@@ -7,6 +7,7 @@
   "cardTranslationPlaceholder": { "message": "Translation" },
   "cardTranslating": { "message": "Translating…" },
   "cardDownloading": { "message": "Loading translator…" },
+  "cardDownloadTranslator": { "message": "Download translator" },
   "cardEnterManually": { "message": "Enter the translation" },
   "cardSave": { "message": "Save" },
   "cardAddContext": { "message": "Add context" },
