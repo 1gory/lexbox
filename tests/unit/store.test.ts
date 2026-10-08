@@ -85,6 +85,16 @@ describe('saveEntry', () => {
     }
   });
 
+  it('saves a common base separately from its lexicalized form', async () => {
+    const meeting = await saveEntry({ text: 'meeting', translation: 'встреча', context: null });
+    const meet = await saveEntry({ text: 'meet', translation: 'встречать', context: null });
+    expect(meet.id).not.toBe(meeting.id);
+    expect((await listEntries()).map((e) => [e.key, e.translation]).sort()).toEqual([
+      ['meet', 'встречать'],
+      ['meeting', 'встреча'],
+    ]);
+  });
+
   it('creates a separate entry for another form on request', async () => {
     const find = await saveEntry({ text: 'find', translation: 'находить', context: null });
     const found = await saveEntry({ text: 'found', translation: 'основать', context: ctx('They found a company.') }, { separate: true });

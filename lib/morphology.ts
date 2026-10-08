@@ -1,3 +1,4 @@
+import { COMMON_BASES } from './common-words';
 import { IRREGULAR_GROUPS } from './irregular';
 
 const VOWELS = new Set(['a', 'e', 'i', 'o', 'u']);
@@ -115,9 +116,10 @@ const undouble = (stem: string): string => (stem.length >= 2 && stem.at(-1) === 
 /** Bases that a regular suffix rule could have produced `w` from (unchecked). */
 function strippedBases(w: string): string[] {
   const out: string[] = [];
-  // The part left before the suffix must contain a vowel: "shed" is not "she" + "d".
+  // The part left before the suffix must contain a vowel: "shed" is not "she" + "d". When one
+  // reading is a common word, the others are junk too ("interesting" is not "intereste" + "ing").
   const fromStem = (stem: string, ...bases: string[]) => {
-    if (hasVowel(stem)) out.push(...bases);
+    if (hasVowel(stem) && !bases.some((b) => COMMON_BASES.has(b))) out.push(...bases);
   };
   if (w.endsWith("'s")) out.push(w.slice(0, -2));
   if (w.endsWith('ies')) out.push(w.slice(0, -3) + 'y');
@@ -141,7 +143,8 @@ function strippedBases(w: string): string[] {
  * "ran" → run, "cities" → city, "stopped" → stop, "making" → make, "world's" → world.
  * A stripped base is kept only if inflecting it gives the word back, so some junk
  * ("stopp" for "stopping") remains; it only matters if it appears in a text.
- * Derivations (-er/-est/-ly) are never reversed.
+ * Derivations (-er/-est/-ly) are never reversed, and common words such as "even", "new" or
+ * "meet" are never stripped bases, since their -s/-ed/-ing forms are often other words.
  */
 export function baseCandidates(word: string): string[] {
   const w = word.toLowerCase();
@@ -151,7 +154,8 @@ export function baseCandidates(word: string): string[] {
   // Irregular verb forms get their bases from the table only ("feed" is not "fee" + "d").
   if (groups.length === 0) {
     for (const base of strippedBases(w)) {
-      if (base.length >= MIN_LENGTH && lemmaInflections(base).has(w)) out.add(base);
+      // Common words are never derived bases: "evening" is not a form of "even" (see COMMON_BASES).
+      if (base.length >= MIN_LENGTH && !COMMON_BASES.has(base) && lemmaInflections(base).has(w)) out.add(base);
     }
   }
   return [...out];

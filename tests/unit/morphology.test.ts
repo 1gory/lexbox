@@ -128,6 +128,43 @@ describe('matchForms', () => {
   });
 });
 
+describe('common words are never derived bases', () => {
+  const expectNoMatch = (word: string, ...unexpected: string[]) => {
+    const all = [...matchForms(word)];
+    for (const f of unexpected) expect(all, `${word} !~ ${f}`).not.toContain(f);
+  };
+
+  it('does not highlight a common word for a lexicalized form', () => {
+    expectNoMatch('evening', 'even');
+    expectNoMatch('news', 'new');
+    expectNoMatch('meeting', 'meet', 'met');
+    expectNoMatch('goods', 'good');
+    expectNoMatch('times', 'time');
+    expectNoMatch('means', 'mean', 'meant');
+    expectNoMatch('building', 'build', 'built');
+    expectNoMatch('feeling', 'feel', 'felt');
+    expectNoMatch('interesting', 'interest', 'interested');
+    expectNoMatch('savings', 'save', 'saving');
+  });
+
+  it('keeps reverse bases of ordinary words', () => {
+    expect([...matchForms('cities')]).toContain('city');
+    expect([...matchForms('stopped')]).toContain('stop');
+    expect([...matchForms('running')]).toContain('run');
+  });
+
+  it('keeps the forward forms of a common word saved directly', () => {
+    expect([...matchForms('meet')]).toEqual(expect.arrayContaining(['meet', 'met', 'meeting', 'meets']));
+    expect([...matchForms('even')]).toContain('evening');
+  });
+
+  it('keeps such words apart in dedup', () => {
+    expect(sameLexeme('meeting', 'meet')).toBe(false);
+    expect(sameLexeme('news', 'new')).toBe(false);
+    expect(sameLexeme('evening', 'even')).toBe(false);
+  });
+});
+
 describe('sameLexeme', () => {
   it('merges inflections of one word', () => {
     expect(sameLexeme('stopping', 'stopped')).toBe(true);
