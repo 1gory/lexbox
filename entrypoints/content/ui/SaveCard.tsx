@@ -10,6 +10,11 @@ import { Floating } from './Floating';
 
 type Status = 'idle' | 'translating' | 'downloading' | 'manual';
 
+/** Runs `action` for real user input only, not for clicks a page script dispatches. */
+const trusted = (action: () => void) => (e: Event) => {
+  if (e.isTrusted) action();
+};
+
 interface Props {
   at: Point;
   selection: SelectionInfo;
@@ -85,6 +90,7 @@ export function SaveCard({ at, selection, existing, onClose }: Props) {
   }
 
   function onKeyDown(e: KeyboardEvent) {
+    if (!e.isTrusted) return;
     if (e.key === 'Enter') {
       if (!(e.target instanceof HTMLInputElement) || e.isComposing) return;
       e.preventDefault();
@@ -113,17 +119,17 @@ export function SaveCard({ at, selection, existing, onClose }: Props) {
         {status === 'manual' && <div class="lx-hint">{t('cardEnterManually')}</div>}
         {entry && <div class="lx-hint lx-existing">{t('cardInDictionary', String(entry.contexts.length))}</div>}
         {otherForm && (
-          <button type="button" class="lx-separate" onClick={saveSeparately}>
+          <button type="button" class="lx-separate" onClick={trusted(saveSeparately)}>
             {t('cardSaveSeparate')}
           </button>
         )}
         {failed && <div class="lx-hint lx-error">{t('cardSaveFailed')}</div>}
         {selection.sentence && <div class="lx-sentence">{selection.sentence}</div>}
         <div class="lx-actions">
-          <button type="button" class="lx-cancel" onClick={onClose}>
+          <button type="button" class="lx-cancel" onClick={trusted(onClose)}>
             {t('cardCancel')}
           </button>
-          <button type="button" class="lx-save" disabled={saving} onClick={() => void save()}>
+          <button type="button" class="lx-save" disabled={saving} onClick={trusted(() => void save())}>
             {entry ? t('cardAddContext') : t('cardSave')}
           </button>
         </div>

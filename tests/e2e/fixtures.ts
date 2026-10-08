@@ -4,7 +4,8 @@ import path from 'node:path';
 import { normalizeKey } from '../../lib/text';
 import type { Context, Entry } from '../../lib/types';
 
-const EXTENSION_DIR = path.resolve('.output/chrome-mv3');
+// `wxt build --mode e2e`: the only build whose shadow root is open, so locators can reach the UI.
+const EXTENSION_DIR = path.resolve('.output/chrome-mv3-e2e');
 const PAGES_DIR = path.resolve('tests/e2e/pages');
 export const ARTICLE_URL = 'http://lexbox.test/article.html';
 
@@ -33,11 +34,15 @@ export const test = base.extend<{ context: BrowserContext; worker: Worker; exten
 
 export const expect = test.expect;
 
-/** Selects `needle` inside `selector` (across inline tags) and fires mouseup like a real user. */
+/**
+ * Selects `needle` inside `selector` (across inline tags) by dragging the mouse over it, like a
+ * user: the content script ignores untrusted, script-dispatched events.
+ */
 export async function selectText(page: Page, selector: string, needle: string): Promise<void> {
   // The content script injects at document_idle, possibly after `load`; wait until its UI host exists.
   await page.locator('lexbox-ui').waitFor({ state: 'attached' });
-  await page.evaluate(
+  await page.locator(selector).scrollIntoViewIfNeeded();
+  const { from, to } = await page.evaluate(
     ({ selector, needle }) => {
       const root = document.querySelector(selector);
       if (!root) throw new Error(`${selector} not found`);
@@ -50,28 +55,36 @@ export async function selectText(page: Page, selector: string, needle: string): 
       }
       const start = full.indexOf(needle);
       if (start < 0) throw new Error(`"${needle}" not found in ${selector}`);
-      const locate = (pos: number, isEnd: boolean) => {
+      /** Viewport rect of the character at `pos` of the concatenated text. */
+      const charRect = (pos: number) => {
         let acc = 0;
         for (const node of nodes) {
-          const len = node.data.length;
-          if (isEnd ? pos <= acc + len : pos < acc + len) return { node, offset: pos - acc };
-          acc += len;
+          if (pos < acc + node.data.length) {
+            const range = document.createRange();
+            range.setStart(node, pos - acc);
+            range.setEnd(node, pos - acc + 1);
+            return range.getBoundingClientRect();
+          }
+          acc += node.data.length;
         }
         throw new Error('offset out of range');
       };
-      const from = locate(start, false);
-      const to = locate(start + needle.length, true);
-      const range = document.createRange();
-      range.setStart(from.node, from.offset);
-      range.setEnd(to.node, to.offset);
-      const selection = window.getSelection()!;
-      selection.removeAllRanges();
-      selection.addRange(range);
-      const rect = range.getBoundingClientRect();
-      document.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, clientX: rect.right, clientY: rect.bottom }));
+      const first = charRect(start);
+      const last = charRect(start + needle.length - 1);
+      // A press inside an old selection would start a drag-and-drop instead of a new selection.
+      window.getSelection()?.removeAllRanges();
+      return {
+        from: { x: first.left + 1, y: first.top + first.height / 2 },
+        to: { x: last.right - 1, y: last.top + last.height / 2 },
+      };
     },
     { selector, needle },
   );
+  await page.mouse.move(from.x, from.y);
+  await page.mouse.down();
+  await page.mouse.move(to.x, to.y, { steps: 5 });
+  await page.mouse.up();
+  await expect.poll(() => page.evaluate(() => window.getSelection()?.toString())).toBe(needle);
 }
 
 type ChromeStorage = {

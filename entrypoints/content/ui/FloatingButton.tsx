@@ -11,7 +11,7 @@ export function FloatingButton({ at, onClick }: { at: Point; onClick: () => void
       style={{ left: `${at.x}px`, top: `${at.y}px` }}
       // Keep the page selection alive while clicking.
       onMouseDown={(e) => e.preventDefault()}
-      onClick={onClick}
+      onClick={(e) => e.isTrusted && onClick()}
     >
       +
     </button>

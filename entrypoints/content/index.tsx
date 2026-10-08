@@ -11,6 +11,8 @@ import { App } from './ui/App';
 import { createUiStore, type UiActions } from './ui-store';
 
 const HIGHLIGHT_NAME = 'lexbox';
+const RESTORE_WINDOW_MS = 10_000;
+const MAX_RESTORES_PER_WINDOW = 10;
 const HIGHLIGHT_CSS = `::highlight(${HIGHLIGHT_NAME}) {
   background-color: rgba(255, 200, 40, 0.22);
   text-decoration: underline dotted rgba(170, 120, 0, 0.75);
@@ -87,6 +89,9 @@ export default defineContentScript({
 
     const ui = await createShadowRootUi(ctx, {
       name: UI_TAG,
+      // Closed, so page scripts cannot reach into the card and tooltip. The e2e build keeps it
+      // open: Playwright locators cannot pierce a closed root.
+      mode: import.meta.env.MODE === 'e2e' ? 'open' : 'closed',
       position: 'inline',
       anchor: 'html',
       append: 'last',
@@ -120,9 +125,35 @@ export default defineContentScript({
       },
     });
 
-    // Turbo Drive and similar swap document.body: rebind the highlighter to the new one.
+    // Pages that rebuild the children of <html> or <head> (hydration, SPA shells) may drop our
+    // nodes: put them back. Rate-limited, so a page that keeps removing them cannot loop us forever.
+    let restoreWindowStart = 0;
+    let restores = 0;
+    function restoreNodes(): void {
+      if (style.isConnected && ui.shadowHost.isConnected) return;
+      const now = Date.now();
+      if (now - restoreWindowStart > RESTORE_WINDOW_MS) {
+        restoreWindowStart = now;
+        restores = 0;
+      }
+      if (++restores > MAX_RESTORES_PER_WINDOW) return;
+      if (!style.isConnected) (document.head ?? document.documentElement).append(style);
+      if (!ui.shadowHost.isConnected) document.documentElement.append(ui.shadowHost);
+    }
+
+    let observedHead: HTMLHeadElement | null = null;
+    function observeHead(): void {
+      if (!bodyObserver || !document.head || document.head === observedHead) return;
+      observedHead = document.head;
+      bodyObserver.observe(observedHead, { childList: true });
+    }
+
     bodyObserver = new MutationObserver(() => {
-      if (ctx.isInvalid || document.body === highlighterRoot) return;
+      if (ctx.isInvalid) return;
+      observeHead();
+      restoreNodes();
+      // Turbo Drive and similar swap document.body: rebind the highlighter to the new one.
+      if (document.body === highlighterRoot) return;
       highlighter?.stop();
       highlighterRoot = document.body;
       highlighter = highlighterRoot ? new Highlighter(highlighterRoot, highlight) : null;
@@ -130,22 +161,34 @@ export default defineContentScript({
       refreshHighlighting();
     });
     bodyObserver.observe(document.documentElement, { childList: true });
+    observeHead();
 
-    ctx.addEventListener(document, 'mouseup', (e) => {
-      if (fromOurUi(e) || !settings.floatingButton) return;
-      // Let the browser finish updating the selection.
-      setTimeout(() => {
-        if (store.get().kind === 'card') return;
-        const selection = readSelection(window.getSelection());
-        if (selection) {
+    // Capture phase, so a page calling stopPropagation cannot hide the button or keep the card open.
+    // Untrusted (script-dispatched) events are ignored: only real user input drives the UI.
+    ctx.addEventListener(
+      document,
+      'mouseup',
+      (e) => {
+        if (!e.isTrusted || fromOurUi(e) || !settings.floatingButton) return;
+        // Let the browser finish updating the selection.
+        setTimeout(() => {
+          if (store.get().kind === 'card') return;
+          const selection = readSelection(window.getSelection());
+          if (!selection) return;
           store.set({ kind: 'button', at: { x: selection.rect.right + 4, y: selection.rect.bottom + 4 }, selection });
-        }
-      }, 0);
-    });
+        }, 0);
+      },
+      { capture: true },
+    );
 
-    ctx.addEventListener(document, 'mousedown', (e) => {
-      if (!fromOurUi(e) && store.get().kind !== 'idle') store.set({ kind: 'idle' });
-    });
+    ctx.addEventListener(
+      document,
+      'mousedown',
+      (e) => {
+        if (e.isTrusted && !fromOurUi(e) && store.get().kind !== 'idle') store.set({ kind: 'idle' });
+      },
+      { capture: true },
+    );
 
     ctx.addEventListener(document, 'selectionchange', () => {
       if (store.get().kind === 'button' && window.getSelection()?.isCollapsed) store.set({ kind: 'idle' });

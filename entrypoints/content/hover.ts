@@ -56,6 +56,8 @@ export function watchHover({ getHighlighter, canShow, onEnter, onLeave, delayMs 
   }
 
   const onMove = (e: MouseEvent) => {
+    // A page script could synthesize moves to read translations out of the tooltip.
+    if (!e.isTrusted) return;
     lastX = e.clientX;
     lastY = e.clientY;
     if (frame) return;
