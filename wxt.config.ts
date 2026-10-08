@@ -10,6 +10,8 @@ export default defineConfig({
     name: '__MSG_extName__',
     description: '__MSG_extDescription__',
     default_locale: 'en',
+    author: 'Igor Pershin <igor.pershin.me@gmail.com>',
+    homepage_url: 'https://github.com/1gory/lexbox',
     // CSS Custom Highlight API (Highlight, CSS.highlights).
     minimum_chrome_version: '105',
     // activeTab: opening the popup lets it read the active tab's url (no install warning), so it can

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <rect x="5" y="5" width="118" height="118" rx="26" fill="#1f2328" stroke="#5b636e" stroke-width="3"/>
+  <text x="64" y="84" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="72" font-weight="700" fill="#ffffff">Lx</text>
+  <rect x="20" y="92" width="88" height="14" rx="7" fill="#ffd43b"/>
+</svg>

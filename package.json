@@ -2,7 +2,7 @@
   "name": "lexbox",
   "description": "Collect English words while reading and see translations in context",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "wxt",
@@ -25,5 +25,7 @@
     "vitest": "^5.0.3",
     "web-ext": "^10.7.0",
     "wxt": "^0.21.4"
-  }
+  },
+  "author": "Igor Pershin <igor.pershin.me@gmail.com>",
+  "license": "MIT"
 }
