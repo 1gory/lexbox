@@ -4,6 +4,8 @@ Chrome extension for learning English words in context. Select an unfamiliar wor
 while reading, save it with a translation, and every saved expression is highlighted on later
 pages, with the translation shown on hover.
 
+**[Website](https://ipershin.me/lexbox/)** &nbsp;·&nbsp; **[Privacy Policy](https://ipershin.me/lexbox/privacy/)** &nbsp;·&nbsp; Chrome Web Store: coming soon
+
 ## Development
 
 ```bash
@@ -32,6 +34,11 @@ uses a closed root.
 ```bash
 npm run zip       # dist/lexbox-<version>-chrome.zip for the Chrome Web Store
 ```
+
+The full release runbook (version bump, checks, store assets, ZIP, tag, GitHub Release, store
+dashboard, ipershin.me pages) is in [RELEASE.md](RELEASE.md). The one-time first-publication steps
+are in [PUBLISH-CHECKLIST.md](PUBLISH-CHECKLIST.md), the store texts in
+[STORE_LISTING.md](STORE_LISTING.md), and the changes per version in [CHANGELOG.md](CHANGELOG.md).
 
 Translation uses Chrome's built-in on-device Translator API (Chrome 138+, en → ru).
 Without it the user types the translation manually.

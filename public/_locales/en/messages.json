@@ -1,6 +1,6 @@
 {
   "extName": { "message": "Lexbox" },
-  "extDescription": { "message": "Collect English words while reading and see their translations right in the text." },
+  "extDescription": { "message": "Save English words and phrases as you read, with a Russian translation. Lexbox highlights them on every page, translation on hover." },
   "cmdSave": { "message": "Save selection to Lexbox" },
   "menuSave": { "message": "Add to Lexbox" },
   "buttonSaveTitle": { "message": "Save to Lexbox" },

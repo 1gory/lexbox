@@ -1,0 +1,15 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; width: 1400px; height: 560px; overflow: hidden; }
+  body { background: #1f2328; position: relative; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+  body::before { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 10px; background: #ffd43b; z-index: 3; }
+  .copy { position: absolute; left: 80px; top: 0; bottom: 0; width: 560px; display: flex; flex-direction: column; justify-content: center; z-index: 2; }
+  .copy img { width: 120px; height: 120px; margin-left: -14px; }
+  h1 { margin: 6px 0 10px; font: 700 84px/1.05 Georgia, 'Times New Roman', serif; color: #fff; }
+  p { margin: 0; font-size: 34px; line-height: 1.25; color: #ffd43b; font-weight: 600; }
+  .shot { position: absolute; left: 700px; top: 70px; width: 880px; height: 477px; border-radius: 14px 0 0 0; box-shadow: 0 12px 50px rgba(0,0,0,.6); object-fit: cover; object-position: left top; z-index: 1; }
+</style></head><body>
+  <div class="copy"><img src="{{ICON}}"><h1>Lexbox</h1><p>{{TAGLINE}}</p></div>
+  <img class="shot" src="{{SHOT}}">
+</body></html>

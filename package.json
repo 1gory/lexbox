@@ -1,6 +1,6 @@
 {
   "name": "lexbox",
-  "description": "Collect English words while reading and see translations in context",
+  "description": "Save English words and phrases as you read, with a Russian translation, and see them highlighted on every page.",
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -11,7 +11,9 @@
     "compile": "tsc --noEmit",
     "test": "vitest run",
     "e2e": "wxt build --mode e2e && playwright test",
-    "postinstall": "wxt prepare"
+    "store:assets": "node scripts/store-assets.mjs",
+    "postinstall": "wxt prepare",
+    "preflight": "node scripts/preflight.mjs"
   },
   "dependencies": {
     "preact": "^11.0.0"

@@ -1,0 +1,15 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; width: 1280px; height: 800px; overflow: hidden; background: #1f2328; }
+  .band { position: absolute; left: 0; top: 0; width: 1280px; height: 110px; background: #1f2328; display: flex; align-items: center; padding: 0 56px; gap: 22px; }
+  .band img.logo { width: 56px; height: 56px; flex: none; }
+  .band h1 { margin: 0; font: 700 40px/1.15 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #fff; letter-spacing: -.01em; }
+  .band h1 em { font-style: normal; color: #ffd43b; }
+  .shot { position: absolute; left: 0; top: 110px; width: 1280px; height: 690px; display: block; background: #fff; }
+  .popup { position: absolute; top: 118px; right: 44px; width: 300px; border-radius: 10px; box-shadow: 0 10px 34px rgba(0,0,0,.35), 0 0 0 1px rgba(0,0,0,.12); display: block; background: #fff; }
+</style></head><body>
+  <div class="band"><img class="logo" src="{{ICON}}"><h1>{{HEADLINE}}</h1></div>
+  <img class="shot" src="{{SHOT}}">
+  {{POPUP}}
+</body></html>

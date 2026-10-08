@@ -1,6 +1,6 @@
 {
   "extName": { "message": "Lexbox" },
-  "extDescription": { "message": "Собирайте английские слова при чтении и смотрите перевод прямо в тексте." },
+  "extDescription": { "message": "Сохраняйте английские слова и фразы при чтении. Lexbox подсветит их на всех страницах и покажет перевод на русский при наведении." },
   "cmdSave": { "message": "Сохранить выделенное в Lexbox" },
   "menuSave": { "message": "Добавить в Lexbox" },
   "buttonSaveTitle": { "message": "Сохранить в Lexbox" },
