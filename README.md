@@ -12,6 +12,9 @@ npx playwright install chromium   # once, for e2e tests
 npm run dev                        # opens Chrome with the extension and hot reload
 ```
 
+To try a production build in your own Chrome, run `npm run build`, open `chrome://extensions`,
+enable Developer mode, click "Load unpacked" and pick `dist/chrome-mv3`.
+
 ## Checks
 
 ```bash
@@ -20,14 +23,14 @@ npm test          # unit tests (Vitest)
 npm run e2e       # e2e build + end-to-end tests (Playwright)
 ```
 
-`npm run e2e` builds with `wxt build --mode e2e` into `.output/chrome-mv3-e2e`. That build keeps
+`npm run e2e` builds with `wxt build --mode e2e` into `dist/chrome-mv3-e2e`. That build keeps
 the content-script shadow root open so Playwright locators can reach the UI; every other build
 uses a closed root.
 
 ## Release
 
 ```bash
-npm run zip       # .output/lexbox-<version>-chrome.zip for the Chrome Web Store
+npm run zip       # dist/lexbox-<version>-chrome.zip for the Chrome Web Store
 ```
 
 Translation uses Chrome's built-in on-device Translator API (Chrome 138+, en → ru).

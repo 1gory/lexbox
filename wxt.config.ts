@@ -3,6 +3,8 @@ import preact from '@preact/preset-vite';
 
 // See https://wxt.dev/api/config.html
 export default defineConfig({
+  // Visible build folder: macOS file pickers hide dot-folders like .output.
+  outDir: 'dist',
   vite: () => ({ plugins: [preact()] }),
   manifest: {
     name: '__MSG_extName__',

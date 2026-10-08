@@ -5,7 +5,7 @@ import { normalizeKey } from '../../lib/text';
 import type { Context, Entry } from '../../lib/types';
 
 // `wxt build --mode e2e`: the only build whose shadow root is open, so locators can reach the UI.
-const EXTENSION_DIR = path.resolve('.output/chrome-mv3-e2e');
+const EXTENSION_DIR = path.resolve('dist/chrome-mv3-e2e');
 const PAGES_DIR = path.resolve('tests/e2e/pages');
 export const ARTICLE_URL = 'http://lexbox.test/article.html';
 /** The same page on a subdomain. */
