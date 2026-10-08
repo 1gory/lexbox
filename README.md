@@ -43,3 +43,9 @@ Without it the user types the translation manually.
   on pages opened before Lexbox was installed. The content script runs on all pages to highlight words.
 - Highlighting uses the CSS Custom Highlight API. Its registry belongs to the page, so a page's own
   scripts can see which words on that page are highlighted, and so learn which of them are saved.
+
+## Export
+
+The dictionary exports a JSON backup and a CSV (text, translation, sentence) for Anki or a
+spreadsheet. CSV cells starting with `=`, `+`, `-` or `@` get a leading `'` so spreadsheets do not
+run them as formulas; the quote is visible after importing into Anki.
