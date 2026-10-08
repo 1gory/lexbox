@@ -63,7 +63,7 @@ source maps.
 - [x] `homepage_url` and `author` set in `wxt.config.ts`
 - [x] `npm run compile`, `npm test`, `npm run e2e` green on the final commit
 - [ ] Loaded `dist/chrome-mv3` unpacked and walked the full loop on a real
-      article (see `RELEASE.md` step 2), with the UI in English and in Russian
+      article (see `RELEASE.md` step 3), with the UI in English and in Russian
 
 ## B. Assets
 
@@ -120,7 +120,7 @@ The site is `/Users/ig/Sites/player-ready-one/pershin.me`
 ## F. Build and create the listing
 
 - [ ] `npm run zip` → `dist/lexbox-1.0.0-chrome.zip`; preflight clean;
-      `unzip -l` checked per `RELEASE.md` step 8
+      `unzip -l` checked per `RELEASE.md` step 9
 - [ ] Dashboard → **New item** → upload the ZIP
 - [ ] **Store listing tab, English:**
   - [ ] Name and summary come from the package (`Lexbox`, `extDescription`);
@@ -163,6 +163,6 @@ The site is `/Users/ig/Sites/player-ready-one/pershin.me`
         (and a badge, as in the sibling repos)
   - [ ] `pershin.me/lexbox/index.html` — store badge with the URL
   - [ ] `pershin.me/projects.json` — the `url` of the Lexbox card
-- [ ] Create the matching **GitHub Release** (`RELEASE.md` step 10) for tag
+- [ ] Create the matching **GitHub Release** (`RELEASE.md` step 11) for tag
       `v1.0.0` with `lexbox-1.0.0-chrome.zip` attached
 - [ ] Install the live version and save one word on a real article to confirm
