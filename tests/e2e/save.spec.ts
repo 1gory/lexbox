@@ -1,4 +1,4 @@
-import { ARTICLE_URL, expect, selectText, storedEntries, test } from './fixtures';
+import { ARTICLE_URL, entryItems, expect, makeEntry, seed, selectText, storedEntries, test } from './fixtures';
 
 test('saves a selected phrase with context', async ({ context, worker }) => {
   const page = await context.newPage();
@@ -40,18 +40,58 @@ test('adds a context when the same word is saved again in another form', async (
   await page.locator('lexbox-ui .lx-save').click();
   await expect.poll(async () => (await storedEntries(worker)).length).toBe(1);
 
-  await selectText(page, '#p3', 'Running');
+  // "running" was saved first; the irregular "ran" shares its base "run".
+  await selectText(page, '#p3', 'ran');
   await page.locator('lexbox-ui .lx-fab').click();
   const card = page.locator('lexbox-ui .lx-card');
   await expect(card.locator('.lx-existing')).toContainText('1');
+  await expect(card.locator('.lx-text')).toHaveValue('running');
   await expect(card.locator('.lx-translation')).toHaveValue('бег');
   await card.locator('.lx-save').click();
 
   await expect.poll(async () => (await storedEntries(worker))[0]?.contexts.map((c) => c.sentence)).toEqual([
-    'Running is healthy.',
+    'They ran across the field.',
     'He kept running until it rained.',
   ]);
   expect(await storedEntries(worker)).toHaveLength(1);
+});
+
+test('saves another form as a separate word on request', async ({ context, worker }) => {
+  await seed(worker, entryItems(makeEntry('run', 'бежать')));
+  const page = await context.newPage();
+  await page.goto(ARTICLE_URL);
+
+  await selectText(page, '#p2', 'running');
+  await page.locator('lexbox-ui .lx-fab').click();
+  const card = page.locator('lexbox-ui .lx-card');
+  await expect(card.locator('.lx-existing')).toHaveCount(1);
+  await expect(card.locator('.lx-text')).toHaveValue('run');
+  await card.locator('.lx-separate').click();
+
+  await expect(card.locator('.lx-existing')).toHaveCount(0);
+  await expect(card.locator('.lx-separate')).toHaveCount(0);
+  await expect(card.locator('.lx-text')).toHaveValue('running');
+  await card.locator('.lx-translation').fill('бег');
+  await card.locator('.lx-save').click();
+  await expect(card).toHaveCount(0);
+
+  await expect
+    .poll(async () => (await storedEntries(worker)).map((e) => [e.key, e.translation, e.contexts.length]).sort())
+    .toEqual([
+      ['run', 'бежать', 0],
+      ['running', 'бег', 1],
+    ]);
+});
+
+test('offers no separate word when the exact word is saved', async ({ context, worker }) => {
+  await seed(worker, entryItems(makeEntry('running', 'бег')));
+  const page = await context.newPage();
+  await page.goto(ARTICLE_URL);
+  await selectText(page, '#p2', 'running');
+  await page.locator('lexbox-ui .lx-fab').click();
+  const card = page.locator('lexbox-ui .lx-card');
+  await expect(card.locator('.lx-existing')).toHaveCount(1);
+  await expect(card.locator('.lx-separate')).toHaveCount(0);
 });
 
 test('Escape closes the card without saving', async ({ context, worker }) => {

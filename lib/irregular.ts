@@ -1,4 +1,7 @@
-/** Irregular verb groups: base form first, then every other form. */
+/**
+ * Irregular verb groups: base form first, then every other form. Verbs heading a group get no
+ * generated regular past, so list "-ed" here when it is valid too ("burn burnt burned").
+ */
 export const IRREGULAR_GROUPS: readonly string[] = [
   'be am is are was were been being',
   'have has having had',
@@ -33,7 +36,7 @@ export const IRREGULAR_GROUPS: readonly string[] = [
   'dream dreamt dreamed',
   'drink drank drunk',
   'drive drove driven',
-  'dwell dwelt',
+  'dwell dwelt dwelled',
   'eat ate eaten',
   'fall fell fallen',
   'feed fed',
@@ -59,7 +62,7 @@ export const IRREGULAR_GROUPS: readonly string[] = [
   'hide hid hidden',
   'hold held',
   'keep kept',
-  'kneel knelt',
+  'kneel knelt kneeled',
   'know knew known',
   'lay laid',
   'lead led',
@@ -68,7 +71,7 @@ export const IRREGULAR_GROUPS: readonly string[] = [
   'learn learnt learned',
   'leave left',
   'lend lent',
-  'lie lay lain lying',
+  'lie lay lain lying lied',
   'light lit lighted',
   'lose lost',
   'make made',
@@ -103,7 +106,7 @@ export const IRREGULAR_GROUPS: readonly string[] = [
   'send sent',
   'sew sewed sewn',
   'shake shook shaken',
-  'shine shone',
+  'shine shone shined',
   'shoot shot',
   'show showed shown',
   'shrink shrank shrunk',
@@ -117,7 +120,7 @@ export const IRREGULAR_GROUPS: readonly string[] = [
   'smell smelt smelled',
   'sow sowed sown',
   'speak spoke spoken',
-  'speed sped',
+  'speed sped speeded',
   'spell spelt spelled',
   'spend spent',
   'spill spilt spilled',

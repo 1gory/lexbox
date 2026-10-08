@@ -1,8 +1,8 @@
 import { render } from 'preact';
 import './ui/styles.css';
 import type { Message, PageInfo } from '@/lib/messages';
-import { buildIndex, matchWhole, type MatchIndex } from '@/lib/matcher';
-import { getSettings, listEntries, onEntriesChanged, onSettingsChanged } from '@/lib/store';
+import { buildIndex, type MatchIndex } from '@/lib/matcher';
+import { findInList, getSettings, listEntries, onEntriesChanged, onSettingsChanged } from '@/lib/store';
 import type { Entry, Settings } from '@/lib/types';
 import { readSelection, UI_TAG, type SelectionInfo } from './dom';
 import { Highlighter } from './highlighter';
@@ -73,12 +73,11 @@ export default defineContentScript({
         await reloading.catch(() => {});
         // The UI moved on while we waited (dismissed, other selection): do not resurrect a card.
         if (ctx.isInvalid || store.get() !== before) return;
-        const id = matchWhole(index, selection.text);
         store.set({
           kind: 'card',
           at: { x: selection.rect.left, y: selection.rect.bottom + 8 },
           selection,
-          existing: id ? (entries.get(id) ?? null) : null,
+          existing: findInList([...entries.values()], selection.text),
         });
       },
       close() {

@@ -10,6 +10,7 @@
   "cardEnterManually": { "message": "Введите перевод" },
   "cardSave": { "message": "Сохранить" },
   "cardAddContext": { "message": "Добавить контекст" },
+  "cardSaveSeparate": { "message": "Сохранить как отдельное слово" },
   "cardCancel": { "message": "Отмена" },
   "cardSaveFailed": { "message": "Не удалось сохранить. Попробуйте ещё раз." },
   "cardInDictionary": {

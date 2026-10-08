@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { fakeBrowser } from 'wxt/testing/fake-browser';
 import {
   addContext,
+  findInList,
   getSettings,
   listEntries,
   onEntriesChanged,
@@ -46,6 +47,63 @@ describe('saveEntry', () => {
     expect(await listEntries()).toHaveLength(1);
   });
 
+  it('merges an inflected form saved first with later forms', async () => {
+    const first = await saveEntry({ text: 'stopped', translation: 'остановился', context: ctx('It stopped.') });
+    const second = await saveEntry({ text: 'stopping', translation: '', context: ctx('Stop stopping.') });
+    const third = await saveEntry({ text: 'stop', translation: '', context: ctx('Stop.') });
+    expect(second.id).toBe(first.id);
+    expect(third.id).toBe(first.id);
+    expect(third.contexts).toHaveLength(3);
+    expect(await listEntries()).toHaveLength(1);
+  });
+
+  it('merges inflections and irregular forms', async () => {
+    for (const [a, b] of [
+      ['running', 'ran'],
+      ['cities', 'city'],
+      ['putting up with', 'put up with'],
+    ] as const) {
+      fakeBrowser.reset();
+      const first = await saveEntry({ text: a, translation: '', context: null });
+      expect((await saveEntry({ text: b, translation: '', context: null })).id, `${a} / ${b}`).toBe(first.id);
+    }
+  });
+
+  it('keeps words related only by -er/-est/-ly separate', async () => {
+    for (const [a, b] of [
+      ['early', 'ear'],
+      ['letter', 'let'],
+      ['bitter', 'bit'],
+      ['manner', 'man'],
+    ] as const) {
+      fakeBrowser.reset();
+      await saveEntry({ text: a, translation: 'a', context: null });
+      await saveEntry({ text: b, translation: 'b', context: null });
+      expect((await listEntries()).map((e) => [e.key, e.translation]).sort(), `${a} / ${b}`).toEqual(
+        [[a, 'a'], [b, 'b']].sort(),
+      );
+    }
+  });
+
+  it('creates a separate entry for another form on request', async () => {
+    const find = await saveEntry({ text: 'find', translation: 'находить', context: null });
+    const found = await saveEntry({ text: 'found', translation: 'основать', context: ctx('They found a company.') }, { separate: true });
+    expect(found.id).not.toBe(find.id);
+    expect(found).toMatchObject({ key: 'found', translation: 'основать' });
+    const entries = await listEntries();
+    expect(entries.map((e) => [e.key, e.translation]).sort()).toEqual([
+      ['find', 'находить'],
+      ['found', 'основать'],
+    ]);
+  });
+
+  it('reuses an exact key even when asked for a separate entry', async () => {
+    const first = await saveEntry({ text: 'found', translation: 'основать', context: null });
+    const again = await saveEntry({ text: 'Found', translation: '', context: ctx('Found it.') }, { separate: true });
+    expect(again.id).toBe(first.id);
+    expect(await listEntries()).toHaveLength(1);
+  });
+
   it('overrides the translation when a new one is given', async () => {
     await saveEntry({ text: 'run', translation: 'бежать', context: null });
     const updated = await saveEntry({ text: 'run', translation: 'управлять', context: null });
@@ -60,6 +118,24 @@ describe('saveEntry', () => {
 
   it('rejects text without words', async () => {
     await expect(saveEntry({ text: '123', translation: '', context: null })).rejects.toThrow();
+  });
+});
+
+describe('findInList', () => {
+  const entry = (key: string, createdAt: number): Entry => ({
+    id: key, text: key, key, translation: '', contexts: [], createdAt, updatedAt: createdAt,
+  });
+
+  it('prefers the exact key over another form, whatever the order', () => {
+    expect(findInList([entry('find', 2), entry('found', 1)], 'Found')?.id).toBe('found');
+    expect(findInList([entry('found', 2), entry('find', 1)], 'Found')?.id).toBe('found');
+    expect(findInList([entry('found', 2), entry('find', 1)], 'find')?.id).toBe('find');
+  });
+
+  it('falls back to an entry of the same lexeme', () => {
+    expect(findInList([entry('find', 1)], 'found')?.id).toBe('find');
+    expect(findInList([entry('stopped', 1)], 'stopping')?.id).toBe('stopped');
+    expect(findInList([entry('ear', 1)], 'early')).toBeNull();
   });
 });
 

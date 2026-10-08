@@ -10,6 +10,7 @@
   "cardEnterManually": { "message": "Enter the translation" },
   "cardSave": { "message": "Save" },
   "cardAddContext": { "message": "Add context" },
+  "cardSaveSeparate": { "message": "Save as a separate word" },
   "cardCancel": { "message": "Cancel" },
   "cardSaveFailed": { "message": "Could not save. Try again." },
   "cardInDictionary": {

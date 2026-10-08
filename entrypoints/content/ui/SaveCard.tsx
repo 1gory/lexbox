@@ -18,20 +18,24 @@ interface Props {
 }
 
 export function SaveCard({ at, selection, existing, onClose }: Props) {
+  // The entry the card adds a context to; null when it creates a new one.
+  const [entry, setEntry] = useState(existing);
+  const [separate, setSeparate] = useState(false);
   const [text, setText] = useState(existing?.text ?? selection.text);
   const [translation, setTranslation] = useState(existing?.translation ?? '');
   const [status, setStatus] = useState<Status>(existing ? 'idle' : 'translating');
   const [saving, setSaving] = useState(false);
   const [failed, setFailed] = useState(false);
   const edited = useRef(false);
+  const mounted = useRef(true);
   const translationRef = useRef<HTMLInputElement>(null);
+  // Another form of the selection is in the dictionary ("find" for "found"): offer a separate entry.
+  const otherForm = entry !== null && entry.key !== normalizeKey(selection.text);
 
-  useEffect(() => {
-    translationRef.current?.focus();
-    if (existing) return;
-    let cancelled = false;
-    void translate(selection.text, () => !cancelled && setStatus('downloading')).then((result) => {
-      if (cancelled) return;
+  function runTranslation() {
+    setStatus('translating');
+    void translate(selection.text, () => mounted.current && setStatus('downloading')).then((result) => {
+      if (!mounted.current) return;
       if (result.status === 'ok') {
         if (!edited.current) setTranslation(result.text);
         setStatus('idle');
@@ -39,21 +43,39 @@ export function SaveCard({ at, selection, existing, onClose }: Props) {
         setStatus('manual');
       }
     });
+  }
+
+  useEffect(() => {
+    translationRef.current?.focus();
+    if (!existing) runTranslation();
     return () => {
-      cancelled = true;
+      mounted.current = false;
     };
   }, []);
+
+  function saveSeparately() {
+    setEntry(null);
+    setSeparate(true);
+    setText(selection.text);
+    setTranslation('');
+    edited.current = false;
+    translationRef.current?.focus();
+    runTranslation();
+  }
 
   async function save() {
     if (saving || !normalizeKey(text)) return;
     setSaving(true);
     setFailed(false);
     try {
-      await saveEntry({
-        text,
-        translation,
-        context: { sentence: selection.sentence, url: location.href, title: document.title, addedAt: Date.now() },
-      });
+      await saveEntry(
+        {
+          text,
+          translation,
+          context: { sentence: selection.sentence, url: location.href, title: document.title, addedAt: Date.now() },
+        },
+        { separate },
+      );
       onClose();
     } catch (error) {
       console.error('[lexbox] save failed', error);
@@ -89,7 +111,12 @@ export function SaveCard({ at, selection, existing, onClose }: Props) {
         />
         {status === 'downloading' && <div class="lx-hint">{t('cardDownloading')}</div>}
         {status === 'manual' && <div class="lx-hint">{t('cardEnterManually')}</div>}
-        {existing && <div class="lx-hint lx-existing">{t('cardInDictionary', String(existing.contexts.length))}</div>}
+        {entry && <div class="lx-hint lx-existing">{t('cardInDictionary', String(entry.contexts.length))}</div>}
+        {otherForm && (
+          <button type="button" class="lx-separate" onClick={saveSeparately}>
+            {t('cardSaveSeparate')}
+          </button>
+        )}
         {failed && <div class="lx-hint lx-error">{t('cardSaveFailed')}</div>}
         {selection.sentence && <div class="lx-sentence">{selection.sentence}</div>}
         <div class="lx-actions">
@@ -97,7 +124,7 @@ export function SaveCard({ at, selection, existing, onClose }: Props) {
             {t('cardCancel')}
           </button>
           <button type="button" class="lx-save" disabled={saving} onClick={() => void save()}>
-            {existing ? t('cardAddContext') : t('cardSave')}
+            {entry ? t('cardAddContext') : t('cardSave')}
           </button>
         </div>
       </div>

@@ -114,3 +114,19 @@
 .lx-error {
   color: #cf222e;
 }
+
+.lx-card .lx-separate {
+  display: block;
+  margin: -4px 0 10px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: #0969da;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.lx-card .lx-separate:hover {
+  text-decoration: underline;
+}

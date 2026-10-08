@@ -1,4 +1,4 @@
-import { buildIndex, matchWhole } from './matcher';
+import { sameLexeme } from './morphology';
 import { normalizeKey } from './text';
 import { DEFAULT_SETTINGS, type Context, type Entry, type EntryDraft, type Settings } from './types';
 
@@ -21,10 +21,14 @@ export async function putEntry(entry: Entry): Promise<void> {
   await browser.storage.local.set({ [entryKey(entry.id)]: entry });
 }
 
-/** The entry `text` is a form of ("running" finds "run"). */
+/**
+ * The entry `text` belongs to: the one with the same key, else one it shares an inflectional
+ * base with ("running" finds "run", "stopping" finds "stopped"; "early" does not find "ear").
+ */
 export function findInList(entries: Entry[], text: string): Entry | null {
-  const id = matchWhole(buildIndex(entries), text);
-  return id ? (entries.find((e) => e.id === id) ?? null) : null;
+  const key = normalizeKey(text);
+  if (!key) return null;
+  return entries.find((e) => e.key === key) ?? entries.find((e) => sameLexeme(e.key, key)) ?? null;
 }
 
 export function addContext(contexts: Context[], context: Context | null): Context[] {
@@ -40,14 +44,20 @@ function newId(): string {
   return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
 }
 
+export interface SaveOptions {
+  /** Do not merge into an entry of another form ("found" next to "find"); an equal key is still reused. */
+  separate?: boolean;
+}
+
 /** Creates an entry, or adds the context to the entry the text is a form of. */
-export async function saveEntry(draft: EntryDraft): Promise<Entry> {
+export async function saveEntry(draft: EntryDraft, { separate = false }: SaveOptions = {}): Promise<Entry> {
   const key = normalizeKey(draft.text);
   if (!key) throw new Error('Nothing to save: the text has no words');
   const now = Date.now();
   const translation = draft.translation.trim();
 
-  const existing = findInList(await listEntries(), draft.text);
+  const entries = await listEntries();
+  const existing = separate ? (entries.find((e) => e.key === key) ?? null) : findInList(entries, draft.text);
   if (existing) {
     const updated: Entry = {
       ...existing,

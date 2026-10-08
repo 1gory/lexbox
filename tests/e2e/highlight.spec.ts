@@ -17,6 +17,15 @@ test('highlights saved words and phrases in any form', async ({ context, worker 
     .toEqual(['Running', 'put up with', 'putting up with', 'ran', 'running', 'running']);
 });
 
+test('highlights every form of words saved in an inflected form', async ({ context, worker }) => {
+  await seed(worker, entryItems(makeEntry('running', 'бег'), makeEntry('putting up with', 'терпеть')));
+  const page = await context.newPage();
+  await page.goto(ARTICLE_URL);
+  await expect
+    .poll(() => highlighted(page))
+    .toEqual(['Running', 'put up with', 'putting up with', 'ran', 'running', 'running']);
+});
+
 test('highlights a word right after it is saved', async ({ context }) => {
   const page = await context.newPage();
   await page.goto(ARTICLE_URL);

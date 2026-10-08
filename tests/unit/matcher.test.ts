@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildIndex, findMatches, matchWhole } from '@/lib/matcher';
+import { buildIndex, findMatches } from '@/lib/matcher';
 
 const index = buildIndex([
   { id: 'run', key: 'run' },
@@ -41,14 +41,57 @@ describe('findMatches', () => {
   });
 });
 
-describe('matchWhole', () => {
-  it('matches a whole text that is a form of an entry', () => {
-    expect(matchWhole(index, 'Running')).toBe('run');
-    expect(matchWhole(index, 'putting up with')).toBe('puw');
+describe('findMatches with inflected entries', () => {
+  const inflected = buildIndex([
+    { id: 'stopped', key: 'stopped' },
+    { id: 'puw', key: 'putting up with' },
+    { id: 'cities', key: 'cities' },
+  ]);
+  const found = (text: string) => findMatches(inflected, text).map((m) => [text.slice(m.start, m.end), m.entryId]);
+
+  it('matches every inflection of a saved inflected word', () => {
+    expect(found('stop, stops, stopping')).toEqual([
+      ['stop', 'stopped'],
+      ['stops', 'stopped'],
+      ['stopping', 'stopped'],
+    ]);
+    expect(found('One city, two cities.')).toEqual([
+      ['city', 'cities'],
+      ['cities', 'cities'],
+    ]);
   });
 
-  it('returns null when the text is longer than the entry', () => {
-    expect(matchWhole(index, 'run fast')).toBeNull();
-    expect(matchWhole(index, '')).toBeNull();
+  it('matches a phrase saved in an inflected form', () => {
+    expect(found('I put up with it')).toEqual([['put up with', 'puw']]);
+  });
+});
+
+describe('exact-key priority', () => {
+  it('prefers the entry that equals the token, whatever the order of entries', () => {
+    for (const entries of [
+      [{ id: 'find', key: 'find' }, { id: 'found', key: 'found' }],
+      [{ id: 'found', key: 'found' }, { id: 'find', key: 'find' }],
+    ]) {
+      const idx = buildIndex(entries);
+      expect(findMatches(idx, 'I found it and find more').map((m) => m.entryId)).toEqual(['found', 'find']);
+    }
+  });
+
+  it('prefers the exact phrase among phrases of equal length', () => {
+    for (const entries of [
+      [{ id: 'base', key: 'put up' }, { id: 'past', key: 'putting up' }],
+      [{ id: 'past', key: 'putting up' }, { id: 'base', key: 'put up' }],
+    ]) {
+      const idx = buildIndex(entries);
+      expect(findMatches(idx, 'putting up, put up').map((m) => m.entryId)).toEqual(['past', 'base']);
+    }
+  });
+
+  it('still prefers a longer phrase over an exact shorter word', () => {
+    const idx = buildIndex([
+      { id: 'put', key: 'put' },
+      { id: 'puw', key: 'put up with' },
+    ]);
+    expect(findMatches(idx, 'put up with').map((m) => m.entryId)).toEqual(['puw']);
   });
 });
