@@ -8,3 +8,13 @@ export function normalizeHost(input: string): string {
     return '';
   }
 }
+
+/** Pages our content script runs on: it matches <all_urls>, which covers http, https and file. */
+export function isContentScriptUrl(url: string | undefined): boolean {
+  if (!url) return false;
+  try {
+    return ['http:', 'https:', 'file:'].includes(new URL(url).protocol);
+  } catch {
+    return false;
+  }
+}

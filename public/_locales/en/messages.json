@@ -21,6 +21,7 @@
   "popupHighlight": { "message": "Highlight saved words" },
   "popupDisableSite": { "message": "Disable on this site" },
   "popupUnavailable": { "message": "Not available on this page" },
+  "popupReload": { "message": "Reload this page to use Lexbox" },
   "popupWordCount": {
     "message": "Words in dictionary: $COUNT$",
     "placeholders": { "count": { "content": "$1" } }

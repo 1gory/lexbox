@@ -1,32 +1,43 @@
 import { useEffect, useState } from 'preact/hooks';
+import { isContentScriptUrl } from '@/lib/host';
 import { t } from '@/lib/i18n';
 import type { Message, PageInfo } from '@/lib/messages';
 import { getSettings, listEntries, onEntriesChanged, onSettingsChanged, updateSettings } from '@/lib/store';
 import type { Entry, Settings } from '@/lib/types';
 
-/** Host of the active tab, or null where the content script cannot run. */
-async function currentPageHost(): Promise<string | null> {
+type PageState =
+  /** The content script answered; `host` is empty on file pages. */
+  | { kind: 'ready'; host: string }
+  /** A web page opened before Lexbox was installed or updated: no content script until it reloads. */
+  | { kind: 'reload' }
+  /** A page the content script cannot run on (browser pages, the store, other extensions). */
+  | { kind: 'unavailable' };
+
+async function activePage(): Promise<PageState> {
   const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
-  if (tab?.id == null) return null;
+  if (tab?.id == null) return { kind: 'unavailable' };
   try {
     const message: Message = { type: 'get-page-info' };
     const info = (await browser.tabs.sendMessage(tab.id, message)) as PageInfo | undefined;
-    return info?.host ?? null;
+    if (info) return { kind: 'ready', host: info.host };
   } catch {
-    return null;
+    // No content script in the tab.
   }
+  // Chrome exposes tab.url only with the "tabs" permission or an explicit host permission; the
+  // content-script matches do not count. Without it the url is undefined and we say "unavailable".
+  return isContentScriptUrl(tab.url) ? { kind: 'reload' } : { kind: 'unavailable' };
 }
 
 export function App() {
   const [settings, setSettings] = useState<Settings | null>(null);
   const [entries, setEntries] = useState<Entry[]>([]);
-  const [host, setHost] = useState<string | null | undefined>(undefined);
+  const [page, setPage] = useState<PageState | null>(null);
 
   useEffect(() => {
     const loadEntries = () => void listEntries().then(setEntries);
     void getSettings().then(setSettings);
     loadEntries();
-    void currentPageHost().then(setHost);
+    void activePage().then(setPage);
     const offSettings = onSettingsChanged(setSettings);
     const offEntries = onEntriesChanged(loadEntries);
     return () => {
@@ -36,6 +47,7 @@ export function App() {
   }, []);
 
   if (!settings) return null;
+  const host = page?.kind === 'ready' ? page.host : null;
   const excluded = host ? settings.excludedSites.includes(host) : false;
 
   function toggleSite() {
@@ -72,7 +84,8 @@ export function App() {
           {t('popupDisableSite')} <span class="host">{host}</span>
         </label>
       )}
-      {host === null && <p class="muted unavailable">{t('popupUnavailable')}</p>}
+      {page?.kind === 'reload' && <p class="muted reload-hint">{t('popupReload')}</p>}
+      {page?.kind === 'unavailable' && <p class="muted unavailable">{t('popupUnavailable')}</p>}
 
       {entries.length === 0 ? (
         <p class="muted">{t('popupEmpty')}</p>

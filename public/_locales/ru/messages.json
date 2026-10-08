@@ -21,6 +21,7 @@
   "popupHighlight": { "message": "Подсвечивать слова" },
   "popupDisableSite": { "message": "Отключить на этом сайте" },
   "popupUnavailable": { "message": "На этой странице недоступно" },
+  "popupReload": { "message": "Перезагрузите страницу, чтобы Lexbox заработал" },
   "popupWordCount": {
     "message": "Слов в словаре: $COUNT$",
     "placeholders": { "count": { "content": "$1" } }
