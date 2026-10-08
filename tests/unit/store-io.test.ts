@@ -57,4 +57,12 @@ describe('toCsv', () => {
     const csv = toCsv([entry('1', 'say "hi"', 'сказать, привет', [ctx('Line one\nline two', 1)])]);
     expect(csv).toBe('text,translation,sentence\n"say ""hi""","сказать, привет","Line one\nline two"\n');
   });
+
+  it('defuses cells a spreadsheet would run as formulas', () => {
+    const csv = toCsv([
+      entry('1', '=HYPERLINK("x")', '+1', [ctx('-2, minus', 1)]),
+      entry('2', '@SUM(A1)', 'a=b', [ctx('\tTabbed', 1)]),
+    ]);
+    expect(csv.split('\n').slice(1, 3)).toEqual([`"'=HYPERLINK(""x"")",'+1,"'-2, minus"`, `'@SUM(A1),a=b,'\tTabbed`]);
+  });
 });

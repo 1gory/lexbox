@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isContentScriptUrl, normalizeHost } from '@/lib/host';
+import { isContentScriptUrl, isExcludedHost, normalizeHost } from '@/lib/host';
 
 describe('normalizeHost', () => {
   it('extracts the hostname from urls and bare hosts', () => {
@@ -26,5 +26,20 @@ describe('isContentScriptUrl', () => {
     expect(isContentScriptUrl('about:blank')).toBe(false);
     expect(isContentScriptUrl('not a url')).toBe(false);
     expect(isContentScriptUrl(undefined)).toBe(false);
+  });
+});
+
+describe('isExcludedHost', () => {
+  it('matches the site itself and its subdomains', () => {
+    expect(isExcludedHost('nytimes.com', ['nytimes.com'])).toBe(true);
+    expect(isExcludedHost('www.nytimes.com', ['nytimes.com'])).toBe(true);
+    expect(isExcludedHost('a.b.nytimes.com', ['other.org', 'nytimes.com'])).toBe(true);
+  });
+
+  it('does not match other hosts that merely end the same way', () => {
+    expect(isExcludedHost('notnytimes.com', ['nytimes.com'])).toBe(false);
+    expect(isExcludedHost('nytimes.com', ['www.nytimes.com'])).toBe(false);
+    expect(isExcludedHost('nytimes.com', [])).toBe(false);
+    expect(isExcludedHost('', ['nytimes.com'])).toBe(false);
   });
 });

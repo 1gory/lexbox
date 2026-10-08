@@ -18,3 +18,8 @@ export function isContentScriptUrl(url: string | undefined): boolean {
     return false;
   }
 }
+
+/** Whether `host` is one of `sites` or a subdomain of one: "nytimes.com" covers "www.nytimes.com". */
+export function isExcludedHost(host: string, sites: readonly string[]): boolean {
+  return host !== '' && sites.some((site) => host === site || host.endsWith(`.${site}`));
+}

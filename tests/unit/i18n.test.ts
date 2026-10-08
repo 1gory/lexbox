@@ -23,3 +23,12 @@ describe('t', () => {
     spy.mockRestore();
   });
 });
+
+describe('locales', () => {
+  it('define the same keys in en and ru', async () => {
+    const { readFile } = await import('node:fs/promises');
+    const keys = async (locale: string) =>
+      Object.keys(JSON.parse(await readFile(`public/_locales/${locale}/messages.json`, 'utf8'))).sort();
+    expect(await keys('ru')).toEqual(await keys('en'));
+  });
+});

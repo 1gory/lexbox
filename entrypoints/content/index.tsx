@@ -1,5 +1,6 @@
 import { render } from 'preact';
 import './ui/styles.css';
+import { isExcludedHost } from '@/lib/host';
 import type { Message, PageInfo } from '@/lib/messages';
 import { buildIndex, type MatchIndex } from '@/lib/matcher';
 import { findInList, getSettings, listEntries, onEntriesChanged, onSettingsChanged } from '@/lib/store';
@@ -49,7 +50,7 @@ export default defineContentScript({
 
     function refreshHighlighting(): void {
       if (ctx.isInvalid || !highlighter) return;
-      const enabled = settings.highlightEnabled && !settings.excludedSites.includes(location.hostname);
+      const enabled = settings.highlightEnabled && !isExcludedHost(location.hostname, settings.excludedSites);
       if (enabled) highlighter.start(index);
       else highlighter.stop();
     }
@@ -158,6 +159,8 @@ export default defineContentScript({
       highlighterRoot = document.body;
       highlighter = highlighterRoot ? new Highlighter(highlighterRoot, highlight) : null;
       hover.reset();
+      // The hovered word is gone with the old body; after reset() no move would ever close the tooltip.
+      if (store.get().kind === 'tooltip') store.set({ kind: 'idle' });
       refreshHighlighting();
     });
     bodyObserver.observe(document.documentElement, { childList: true });

@@ -108,7 +108,13 @@ export async function importBackup(json: string): Promise<number> {
   return imported;
 }
 
-const csvCell = (value: string): string => (/[",\n\r]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value);
+/** A leading quote stops spreadsheets from running a cell that starts like a formula. */
+const defuseFormula = (value: string): string => (/^[=+\-@\t\r]/.test(value) ? `'${value}` : value);
+
+function csvCell(raw: string): string {
+  const value = defuseFormula(raw);
+  return /[",\n\r]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
+}
 
 export function toCsv(entries: Entry[]): string {
   const rows = [

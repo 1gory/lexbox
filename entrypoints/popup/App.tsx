@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'preact/hooks';
-import { isContentScriptUrl } from '@/lib/host';
+import { isContentScriptUrl, isExcludedHost } from '@/lib/host';
 import { t } from '@/lib/i18n';
 import type { Message, PageInfo } from '@/lib/messages';
 import { getSettings, listEntries, onEntriesChanged, onSettingsChanged, updateSettings } from '@/lib/store';
@@ -48,12 +48,15 @@ export function App() {
 
   if (!settings) return null;
   const host = page?.kind === 'ready' ? page.host : null;
-  const excluded = host ? settings.excludedSites.includes(host) : false;
+  const excluded = host ? isExcludedHost(host, settings.excludedSites) : false;
 
   function toggleSite() {
     if (!host || !settings) return;
     const sites = settings.excludedSites;
-    void updateSettings({ excludedSites: excluded ? sites.filter((h) => h !== host) : [...sites, host] });
+    // Turning it back on removes every entry covering this host, "example.com" for "www.example.com" too.
+    void updateSettings({
+      excludedSites: excluded ? sites.filter((site) => !isExcludedHost(host, [site])) : [...sites, host],
+    });
   }
 
   function openDictionary() {

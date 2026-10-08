@@ -8,6 +8,8 @@ import type { Context, Entry } from '../../lib/types';
 const EXTENSION_DIR = path.resolve('.output/chrome-mv3-e2e');
 const PAGES_DIR = path.resolve('tests/e2e/pages');
 export const ARTICLE_URL = 'http://lexbox.test/article.html';
+/** The same page on a subdomain. */
+export const WWW_ARTICLE_URL = 'http://www.lexbox.test/article.html';
 
 export const test = base.extend<{ context: BrowserContext; worker: Worker; extensionId: string }>({
   context: async ({}, use) => {
@@ -15,7 +17,7 @@ export const test = base.extend<{ context: BrowserContext; worker: Worker; exten
       channel: 'chromium',
       args: [`--disable-extensions-except=${EXTENSION_DIR}`, `--load-extension=${EXTENSION_DIR}`],
     });
-    await context.route('http://lexbox.test/**', (route) => {
+    await context.route(/^http:\/\/(www\.)?lexbox\.test\//, (route) => {
       const file = path.join(PAGES_DIR, new URL(route.request().url()).pathname.slice(1));
       if (!fs.existsSync(file)) return route.fulfill({ status: 404, body: 'not found' });
       return route.fulfill({ contentType: 'text/html; charset=utf-8', body: fs.readFileSync(file, 'utf8') });

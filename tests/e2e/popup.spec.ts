@@ -37,3 +37,22 @@ test('asks to reload a web page that has no content script yet', async ({ contex
   await expect(page.locator('.unavailable')).toHaveCount(0);
   await expect(page.locator('.site-toggle')).toHaveCount(0);
 });
+
+test('turning a site back on removes every entry covering the host', async ({ context, worker, extensionId }) => {
+  await seed(worker, { settings: { highlightEnabled: true, floatingButton: true, excludedSites: ['example.com', 'other.org'] } });
+  const page = await context.newPage();
+  // The popup opened as a tab is its own active tab: fake an active web page on a subdomain.
+  await page.addInitScript(() => {
+    type Tabs = { tabs: { query: unknown; sendMessage: unknown } };
+    const { tabs } = (globalThis as unknown as { chrome: Tabs }).chrome;
+    tabs.query = async () => [{ id: 4242, url: 'https://www.example.com/a' }];
+    tabs.sendMessage = async () => ({ host: 'www.example.com' });
+  });
+  await page.goto(`chrome-extension://${extensionId}/popup.html`);
+  const toggle = page.locator('.site-toggle');
+  await expect(toggle).toBeChecked();
+  await toggle.uncheck();
+  await expect.poll(async () => (await storedSettings(worker))?.excludedSites).toEqual(['other.org']);
+  await toggle.check();
+  await expect.poll(async () => (await storedSettings(worker))?.excludedSites).toEqual(['other.org', 'www.example.com']);
+});

@@ -8,6 +8,8 @@ export default defineConfig({
     name: '__MSG_extName__',
     description: '__MSG_extDescription__',
     default_locale: 'en',
+    // CSS Custom Highlight API (Highlight, CSS.highlights).
+    minimum_chrome_version: '105',
     permissions: ['storage', 'unlimitedStorage', 'contextMenus'],
     commands: {
       'save-selection': {
