@@ -27,6 +27,20 @@ describe('isContentScriptUrl', () => {
     expect(isContentScriptUrl('not a url')).toBe(false);
     expect(isContentScriptUrl(undefined)).toBe(false);
   });
+
+  it('rejects pages where Chrome never runs content scripts', () => {
+    expect(isContentScriptUrl('https://chromewebstore.google.com/detail/abc')).toBe(false);
+    expect(isContentScriptUrl('https://chrome.google.com/webstore/detail/abc')).toBe(false);
+    expect(isContentScriptUrl('https://example.com/paper.PDF')).toBe(false);
+    expect(isContentScriptUrl('file:///home/me/paper.pdf')).toBe(false);
+    expect(isContentScriptUrl('https://chrome.google.com/search')).toBe(true);
+    expect(isContentScriptUrl('https://example.com/pdf-guide.html')).toBe(true);
+  });
+
+  it('rejects file pages without file access', () => {
+    expect(isContentScriptUrl('file:///home/me/page.html', { fileAccess: false })).toBe(false);
+    expect(isContentScriptUrl('https://example.com', { fileAccess: false })).toBe(true);
+  });
 });
 
 describe('isExcludedHost', () => {

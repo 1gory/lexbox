@@ -26,7 +26,9 @@ async function activePage(): Promise<PageState> {
   // Chrome exposes tab.url only with "tabs" or a host permission; the content-script matches do not
   // count. activeTab grants it for the active tab when the user opens the popup. If the url is still
   // missing (popup opened as a tab, as in e2e) we say "unavailable".
-  return isContentScriptUrl(tab.url) ? { kind: 'reload' } : { kind: 'unavailable' };
+  // Reloading does not help where Chrome never injects us (store, PDFs, file pages without access).
+  const fileAccess = await browser.extension.isAllowedFileSchemeAccess().catch(() => false);
+  return isContentScriptUrl(tab.url, { fileAccess }) ? { kind: 'reload' } : { kind: 'unavailable' };
 }
 
 export function App() {
