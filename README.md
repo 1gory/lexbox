@@ -4,7 +4,9 @@ Chrome extension for learning English words in context. Select an unfamiliar wor
 while reading, save it with a translation, and every saved expression is highlighted on later
 pages, with the translation shown on hover.
 
-**[Website](https://ipershin.me/lexbox/)** &nbsp;·&nbsp; **[Privacy Policy](https://ipershin.me/lexbox/privacy/)** &nbsp;·&nbsp; Chrome Web Store: coming soon
+[<img src="store/chrome-webstore-badge.png" alt="Available in the Chrome Web Store" height="58">](https://chromewebstore.google.com/detail/lexbox/docpkegnbgaadchkoafmlmkphhhkhbfa)
+
+**[Website](https://ipershin.me/lexbox/)** &nbsp;·&nbsp; **[Privacy Policy](https://ipershin.me/lexbox/privacy/)** &nbsp;·&nbsp; **[Chrome Web Store](https://chromewebstore.google.com/detail/lexbox/docpkegnbgaadchkoafmlmkphhhkhbfa)**
 
 ## Development
 

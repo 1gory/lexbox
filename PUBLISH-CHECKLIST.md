@@ -3,8 +3,9 @@
 One-time steps to get **Lexbox** from "code on disk" to "live on the Chrome Web
 Store". Do this once. Every release *after* the first uses `RELEASE.md` instead.
 
-> **Status:** code, icons, version 1.0.0 and the license are done. Nothing is
-> published yet: no GitHub repo, no ipershin.me pages, no store listing.
+> ✅ **Done — v1.0.0 is live** (2026-10-10):
+> <https://chromewebstore.google.com/detail/lexbox/docpkegnbgaadchkoafmlmkphhhkhbfa>
+> Open items: the checks at the end of step H.
 
 Work top to bottom — later steps depend on earlier ones (the GitHub repo must
 exist before the GitHub Release, the privacy policy must be live before you can
@@ -112,57 +113,61 @@ The site is `/Users/ig/Sites/player-ready-one/pershin.me`
 
 ## E. Chrome Web Store developer account
 
-- [ ] Sign in to the [Developer Dashboard](https://chrome.google.com/webstore/devconsole/)
+- [x] Sign in to the [Developer Dashboard](https://chrome.google.com/webstore/devconsole/)
       with the account that publishes the other extensions (the one-time $5
       registration fee is per developer account, not per extension)
-- [ ] The developer contact email is verified (required before publishing)
+- [x] The developer contact email is verified (required before publishing)
 
 ## F. Build and create the listing
 
-- [ ] `npm run zip` → `dist/lexbox-1.0.0-chrome.zip`; preflight clean;
+- [x] `npm run zip` → `dist/lexbox-1.0.0-chrome.zip`; preflight clean;
       `unzip -l` checked per `RELEASE.md` step 9
-- [ ] Dashboard → **New item** → upload the ZIP
-- [ ] **Store listing tab, English:**
-  - [ ] Name and summary come from the package (`Lexbox`, `extDescription`);
+- [x] Dashboard → **New item** → upload the ZIP
+- [x] **Store listing tab, English:**
+  - [x] Name and summary come from the package (`Lexbox`, `extDescription`);
         confirm they show
-  - [ ] Detailed description: English block from `STORE_LISTING.md`
-  - [ ] Category: **Education**
-  - [ ] Language: **English**
-  - [ ] Screenshots: `store/screenshots/en/` 1–4 in order
-  - [ ] Small promo tile (and marquee, if used) from `store/promo/en/`
-  - [ ] Icon 128×128 (pulled from the package, but confirm it shows)
-  - [ ] Homepage URL `https://ipershin.me/lexbox/`, support URL
+  - [x] Detailed description: English block from `STORE_LISTING.md`
+  - [x] Category: **Education**
+  - [x] Language: **English**
+  - [x] Screenshots: `store/screenshots/en/` 1–4 in order
+  - [x] Small promo tile (and marquee, if used) from `store/promo/en/`
+  - [x] Icon 128×128 (pulled from the package, but confirm it shows)
+  - [x] Homepage URL `https://ipershin.me/lexbox/`, support URL
         `https://github.com/1gory/lexbox/issues`
-- [ ] **Store listing tab, Russian** (add the language):
-  - [ ] Detailed description: Russian block from `STORE_LISTING.md`
-  - [ ] Screenshots: `store/screenshots/ru/` 1–4; promo tiles from
+- [x] **Store listing tab, Russian** (add the language):
+  - [x] Detailed description: Russian block from `STORE_LISTING.md`
+  - [x] Screenshots: `store/screenshots/ru/` 1–4; promo tiles from
         `store/promo/ru/`
-  - [ ] Summary shows the Russian `extDescription`
-- [ ] **Privacy tab:**
-  - [ ] Single purpose: paste from `STORE_LISTING.md`
-  - [ ] Permission justifications for `storage`, `unlimitedStorage`,
+  - [x] Summary shows the Russian `extDescription`
+- [x] **Privacy tab:**
+  - [x] Single purpose: paste from `STORE_LISTING.md`
+  - [x] Permission justifications for `storage`, `unlimitedStorage`,
         `contextMenus`, `activeTab` and host access: paste from
         `STORE_LISTING.md`
-  - [ ] Remote code: **No**
-  - [ ] Data usage: **does not collect user data** — tick no data types; tick
+  - [x] Remote code: **No**
+  - [x] Data usage: **does not collect user data** — tick no data types; tick
         the three certifications
-  - [ ] Privacy policy URL: `https://ipershin.me/lexbox/privacy/`
-- [ ] **Distribution:** Public (or Unlisted for a soft launch first), all regions
+  - [x] Privacy policy URL: `https://ipershin.me/lexbox/privacy/`
+- [x] **Distribution:** Public (or Unlisted for a soft launch first), all regions
 
 ## G. Submit
 
-- [ ] Re-read the listing preview once more, in both languages
-- [ ] **Submit for review**. The first review can take longer than updates,
+- [x] Re-read the listing preview once more, in both languages
+- [x] **Submit for review**. The first review can take longer than updates,
       anywhere from hours to a few days; the `<all_urls>` content script
       makes an in-depth review likely.
 
 ## H. After it goes live
 
-- [ ] Copy the live listing URL and add it to:
-  - [ ] `README.md` — replace "Chrome Web Store: coming soon" with the link
+- [x] Copy the live listing URL and add it to:
+  - [x] `README.md` — replace "Chrome Web Store: coming soon" with the link
         (and a badge, as in the sibling repos)
-  - [ ] `pershin.me/lexbox/index.html` — store badge with the URL
-  - [ ] `pershin.me/projects.json` — the `url` of the Lexbox card
-- [ ] Create the matching **GitHub Release** (`RELEASE.md` step 11) for tag
+  - [x] `pershin.me/lexbox/index.html` and `ru/lexbox/index.html` — store
+        badge and link, `downloadUrl` in the structured data
+  - [x] `pershin.me/projects.json` — the `url` of the Lexbox card (also turns
+        on the store stats on the card)
+- [x] Create the matching **GitHub Release** (`RELEASE.md` step 11) for tag
       `v1.0.0` with `lexbox-1.0.0-chrome.zip` attached
+- [ ] Open the live listing in English and Russian: summary, description,
+      screenshots and promo tiles in the right language
 - [ ] Install the live version and save one word on a real article to confirm

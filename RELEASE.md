@@ -5,15 +5,14 @@ The common runbook is [`../RELEASE.md`](../RELEASE.md) (the shared
 file holds only what is specific to this extension. Section numbers match the
 common steps.
 
-> **For the very first publication**, do `PUBLISH-CHECKLIST.md` first (one-time
-> setup: GitHub repo, ipershin.me pages, developer account, listing creation).
-> Use the runbooks for that release and every release after.
+> The first publication (`PUBLISH-CHECKLIST.md`) is done — v1.0.0 went live on
+> 2026-10-10. Every release uses the runbooks.
 
 | | |
 |---|---|
 | Version lives in | `package.json` (+ `package-lock.json`); WXT writes it into the built manifest — there is no manifest in the repo |
 | Version history | `CHANGELOG.md` (not shown in the UI) |
-| Store listing | `STORE_LISTING.md`, English **and** Russian |
+| Store listing | `STORE_LISTING.md`, English **and** Russian · ID `docpkegnbgaadchkoafmlmkphhhkhbfa` |
 | Landing | `https://ipershin.me/lexbox/` (+ `/privacy/`) |
 | GitHub | `1gory/lexbox`, default branch `master` |
 | ZIP | `dist/lexbox-X.Y.Z-chrome.zip`, built by `npm run zip` |
@@ -74,8 +73,6 @@ grep -m2 '"version"' package.json package-lock.json
 ### 7. Site
 - [ ] Card image: `pershin.me/img/projects/lexbox.jpg` is a copy of
       `store/site/lexbox.jpg` if slot 1 changed.
-- [ ] `projects.json` has no store `url` yet — add it once the listing is live
-      (the stats on the card depend on it).
 
 ### 8. Commit + tag
 - [ ] `dist/`, `.wxt/`, `test-results/` stay ignored.
